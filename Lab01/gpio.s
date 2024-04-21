@@ -176,7 +176,7 @@ GPIO_PORTB_AHB_WAKELVL_R    EQU 0x40059544
 GPIO_PORTB_AHB_WAKESTAT_R   EQU 0x40059548 
 GPIO_PORTB_AHB_PP_R         EQU 0x40059FC0 
 GPIO_PORTB_AHB_PC_R         EQU 0x40059FC4
-GPIO_PORTB					EQU	2_
+GPIO_PORTB					EQU	2_000000000000010
 
 
 ; -------------------------------------------------------------------------------
@@ -242,7 +242,7 @@ EsperaGPIO  LDR     R1, [R0]						;Lê da memória o conteúdo do endereço do regis
             STR     R1, [R0]
 			LDR     R0, =GPIO_PORTP_PCTL_R      	;Carrega o R0 com o endereço do PCTL para a porta P
             STR     R1, [R0]
-			LDR     R0, =GPIO_PORTB_AHB_PCTL_R      	;Carrega o R0 com o endereço do PCTL para a porta B
+			LDR     R0, =GPIO_PORTB_AHB_PCTL_R      ;Carrega o R0 com o endereço do PCTL para a porta B
             STR     R1, [R0]
 			LDR     R0, =GPIO_PORTQ_PCTL_R      	;Carrega o R0 com o endereço do PCTL para a porta Q
             STR     R1, [R0]
@@ -263,7 +263,7 @@ EsperaGPIO  LDR     R1, [R0]						;Lê da memória o conteúdo do endereço do regis
 			MOV     R1, #2_00100000					;PP5
             STR     R1, [R0]
 			
-			LDR     R0, =GPIO_PORTP_DIR_R			;Carrega o R0 com o endereço do DIR para a porta B
+			LDR     R0, =GPIO_PORTB_AHB_DIR_R			;Carrega o R0 com o endereço do DIR para a porta B
 			MOV     R1, #2_00110000					;PB5, PB4
             STR     R1, [R0]
 			
@@ -340,15 +340,13 @@ PortJ_Input
 	
 ; -------------------------------------------------------------------------------
 ; Fun??o Print_Display
-; Par?metro de entrada: R2
+; Par?metro de entrada: R0,R2
 ; Par?metro de sa?da: N?o Tem
 Print_Display
 
 	LDR	R1, =GPIO_PORTP_DATA_R
-	MOV R0, #0
 	STR R0, [R1]							;Desabilita o transistor Q1
 	LDR	R1, =GPIO_PORTB_AHB_DATA_R
-	MOV R0, #2_00110000
 	STR R0, [R1]							;Habilita os transistores Q2 e Q3
 
 	LDR	R1, =GPIO_PORTQ_DATA_R
@@ -388,52 +386,52 @@ Print_Ports
 Display_0
 	MOV		R3, #2_00001111
 	MOV		R4, #2_00110000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_1
 	MOV		R3, #2_00000110
 	MOV		R4, #2_00000000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_2
 	MOV		R3, #2_00001011
 	MOV		R4, #2_01010000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_3
 	MOV		R3, #2_00001111
 	MOV		R4, #2_01000000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_4
 	MOV		R3, #2_00000110
 	MOV		R4, #2_01100000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_5
 	MOV		R3, #2_00001101
 	MOV		R4, #2_01100000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_6
 	MOV		R3, #2_00001111
 	MOV		R4, #2_01100000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_7
 	MOV		R3, #2_00000111
 	MOV		R4, #2_00000000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_8
 	MOV		R3, #2_00001111
 	MOV		R4, #2_01110000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_9
 	MOV		R3, #2_00001111
 	MOV		R4, #2_01100000
-	BL		Print_Ports
+	B		Print_Ports
 
 ; -------------------------------------------------------------------------------
 ; Função HABILITAR_LEDS

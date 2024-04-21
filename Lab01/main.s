@@ -56,6 +56,7 @@ Start
 	MOV 	R7,#3;
 	BL 		ACENDER_LED_ESTADO
 	MOV 	R2,#3;
+	MOV 	R0, #2_00010000
 	BL		Print_Display
 	BL 		Fim
 
