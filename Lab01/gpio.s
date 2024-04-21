@@ -340,7 +340,7 @@ PortJ_Input
 	
 ; -------------------------------------------------------------------------------
 ; Fun??o Print_Display
-; Par?metro de entrada: R0,R2
+; Par?metro de entrada: R0(Display Enable), R2(Value)
 ; Par?metro de sa?da: N?o Tem
 Print_Display
 
@@ -414,8 +414,8 @@ Display_5
 	B		Print_Ports
 	
 Display_6
-	MOV		R3, #2_00001111
-	MOV		R4, #2_01100000
+	MOV		R3, #2_00001101
+	MOV		R4, #2_01110000
 	B		Print_Ports
 	
 Display_7

@@ -1,10 +1,3 @@
-; main.s
-; Desenvolvido para a placa EK-TM4C1294XL
-; Prof. Guilherme Peron
-; 24/08/2020
-; Este programa espera o usuário apertar a chave USR_SW1.
-; Caso o usuário pressione a chave, o LED1 piscará a cada 0,5 segundo.
-
 ; -------------------------------------------------------------------------------
         THUMB                        ; Instruções do tipo Thumb-2
 ; -------------------------------------------------------------------------------
@@ -12,6 +5,8 @@
 ; Declarações EQU - Defines
 ;<NOME>         EQU <VALOR>
 ; ========================
+DISPLAY_U_EN	EQU	2_00100000
+DISPLAY_D_EN	EQU	2_00010000
 
 ; -------------------------------------------------------------------------------
 ; Área de Dados - Declarações de variáveis
@@ -49,18 +44,23 @@
 ; -------------------------------------------------------------------------------
 ; Função main()
 Start  		
-	BL 		PLL_Init                  ;Chama a subrotina para alterar o clock do microcontrolador para 80MHz
+	BL 		PLL_Init                  	;Chama a subrotina para alterar o clock do microcontrolador para 80MHz
 	BL 		SysTick_Init
-	BL 		GPIO_Init                 ;Chama a subrotina que inicializa os GPIO
+	BL 		GPIO_Init                 	;Chama a subrotina que inicializa os GPIO
 	BL 		HABILITAR_LEDS
-	MOV 	R7,#3;
-	BL 		ACENDER_LED_ESTADO
-	MOV 	R2,#3;
-	MOV 	R0, #2_00010000
+;	MOV 	R7,#3;
+;	BL 		ACENDER_LED_ESTADO
+	MOV 	R2, #0;
+	MOV 	R0, #DISPLAY_D_EN
 	BL		Print_Display
+	MOV		R9, #1						;Contador display estado crescente/decrescente
+	MOV		R10, #0						;Contador display dezenas
+	MOV		R11, #0						;Contador display unidades
+	MOV		R12, #1						;Passo
 	BL 		Fim
 
 MainLoop
+	BL 		Display_Count				;Chama a rotina para piscar LED
 	BL 		PortJ_Input				 	;Chama a subrotina que lê o estado das chaves e coloca o resultado em R0
 Verifica_Nenhuma
 	CMP		R0, #2_00000001			 	;Verifica se nenhuma chave está pressionada
@@ -71,27 +71,55 @@ Verifica_Nenhuma
 Verifica_SW1	
 	CMP 	R0, #2_00000000			 	;Verifica se somente a chave SW1 está pressionada
 	BNE 	MainLoop                 	;Se o teste falhou, volta para o início do laço principal
-	BL 		Pisca_LED				 	;Chama a rotina para piscar LED
 	B 		MainLoop                   	;Volta para o laço principal
 
 ;--------------------------------------------------------------------------------
-; Função Pisca_LED
+; Função Display_Count
 ; Parâmetro de entrada: Não tem
 ; Parâmetro de saída: Não tem
-Pisca_LED
-	MOV 	R0, #2_10				 	;Setar o parâmetro de entrada da função setando o BIT1
+Display_Count
+	ADD		R11, R12					;Incrementa o contador das unidades(R11) com o passo(R12)
+	CMP		R11, #10					;Testa se o contador das unidades(R11) chegou no limite
+	BCS		Limit_Count_U
+Print_Display_Count
+	MOV		R6, #0						;Contador para printar o mesmo numero varias vezes
+Print_Display_Count_Loop
+	MOV		R0, #DISPLAY_U_EN
+	MOV		R2, R11
+	PUSH	{LR}
+	BL		Print_Display
+	POP		{LR}
 	PUSH 	{LR}
-	BL 		PortN_Output				;Chamar a função para acender o LED1
-	MOV 	R0, #500                	;Chamar a rotina para esperar 0,5s
+	MOV 	R0, #1	                	;Chamar a rotina para esperar 0,5s
 	BL 		SysTick_Wait1ms
-	MOV 	R0, #0					 	;Setar o parâmetro de entrada da função apagando o BIT1
-	BL 		PortN_Output				;Chamar a rotina para apagar o LED
-	MOV 	R0, #500                	;Chamar a rotina para esperar 0,5
-	BL 		SysTick_Wait1ms	
 	POP 	{LR}
+	
+	MOV		R0, #DISPLAY_D_EN
+	MOV		R2, R10
+	PUSH	{LR}
+	BL		Print_Display
+	POP		{LR}
+	PUSH 	{LR}
+	MOV 	R0, #1	                	;Chamar a rotina para esperar 0,5s
+	BL 		SysTick_Wait1ms
+	POP 	{LR}
+	ADD		R6, #1
+	CMP		R6, 500
+	BCC		Print_Display_Count_Loop
 	BX 		LR						 	;return
 
-
+Limit_Count_U
+	SUB		R11, #10					;(Caso o passo seja maior que 1)
+	ADD		R10, #1
+	CMP		R10, #10					;Testa se o contador das dezenas(R10) chegou no limite
+	BCS		Limit_Count_D
+	B		Print_Display_Count
+	
+Limit_Count_D
+	MOV		R11, #0						;Zera o contador das unidades(R11)
+	MOV		R10, #0						;Zera o contador das dezenas(R10)
+	B		Print_Display_Count
+	
 
 Fim
 	NOP;
