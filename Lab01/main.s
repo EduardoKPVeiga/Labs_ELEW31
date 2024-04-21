@@ -56,7 +56,7 @@ Start
 	MOV		R9, #1						;Contador display estado crescente/decrescente
 	MOV		R10, #0						;Contador display dezenas
 	MOV		R11, #0						;Contador display unidades
-	MOV		R12, #1						;Passo
+	MOV		R12, #5						;Passo
 	BL 		Fim
 
 MainLoop
@@ -78,9 +78,19 @@ Verifica_SW1
 ; Parâmetro de entrada: Não tem
 ; Parâmetro de saída: Não tem
 Display_Count
+	CMP		R9, #1						;Testa se e contagem crescente ou decrescente
+	BEQ		Increase_Display_Count
+	BNE		Decrease_Display_Count
+Increase_Display_Count
 	ADD		R11, R12					;Incrementa o contador das unidades(R11) com o passo(R12)
 	CMP		R11, #10					;Testa se o contador das unidades(R11) chegou no limite
 	BCS		Limit_Count_U
+	B		Print_Display_Count
+Decrease_Display_Count
+	SUB		R11, R12
+	CMP		R11, #0					;Testa se o contador das unidades(R11) chegou no limite
+	BLT		Limit_Count_U
+	B		Print_Display_Count
 Print_Display_Count
 	MOV		R6, #0						;Contador para printar o mesmo numero varias vezes
 Print_Display_Count_Loop
@@ -90,7 +100,7 @@ Print_Display_Count_Loop
 	BL		Print_Display
 	POP		{LR}
 	PUSH 	{LR}
-	MOV 	R0, #1	                	;Chamar a rotina para esperar 0,5s
+	MOV 	R0, #1	                	;Chamar a rotina de delay
 	BL 		SysTick_Wait1ms
 	POP 	{LR}
 	
@@ -100,24 +110,42 @@ Print_Display_Count_Loop
 	BL		Print_Display
 	POP		{LR}
 	PUSH 	{LR}
-	MOV 	R0, #1	                	;Chamar a rotina para esperar 0,5s
+	MOV 	R0, #1	                	;Chamar a rotina de delay
 	BL 		SysTick_Wait1ms
 	POP 	{LR}
 	ADD		R6, #1
-	CMP		R6, 500
+	CMP		R6, #500						;Printa os numeros 500 vezes
 	BCC		Print_Display_Count_Loop
 	BX 		LR						 	;return
 
 Limit_Count_U
+	CMP		R9, #1						;Testa se e contagem crescente ou decrescente
+	BEQ		Increase_Count_D
+	BNE		Decrease_Count_D
+Increase_Count_D
 	SUB		R11, #10					;(Caso o passo seja maior que 1)
 	ADD		R10, #1
 	CMP		R10, #10					;Testa se o contador das dezenas(R10) chegou no limite
 	BCS		Limit_Count_D
 	B		Print_Display_Count
+Decrease_Count_D
+	ADD		R11, #10					;(Caso o passo seja menor que -1)
+	SUB		R10, #1
+	CMP		R10, #0						;Testa se o contador das dezenas(R10) chegou no limite
+	BLT		Limit_Count_D
+	B		Print_Display_Count
 	
 Limit_Count_D
+	CMP		R9, #1						;Testa se e contagem crescente ou decrescente
+	BEQ		Restart_Count_Asc
+	BNE		Restart_Count_Desc
+Restart_Count_Asc
 	MOV		R11, #0						;Zera o contador das unidades(R11)
 	MOV		R10, #0						;Zera o contador das dezenas(R10)
+	B		Print_Display_Count
+Restart_Count_Desc
+	MOV		R11, #9						;Zera o contador das unidades(R11)
+	MOV		R10, #9						;Zera o contador das dezenas(R10)
 	B		Print_Display_Count
 	
 
