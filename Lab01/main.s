@@ -40,7 +40,6 @@ DISPLAY_D_EN	EQU	2_00010000
 		IMPORT 	HABILITAR_LEDS
 		IMPORT 	Print_Display
 
-
 ; -------------------------------------------------------------------------------
 ; Função main()
 Start  		
@@ -50,17 +49,20 @@ Start
 	BL 		HABILITAR_LEDS
 ;	MOV 	R7,#3;
 ;	BL 		ACENDER_LED_ESTADO
-	MOV 	R2, #0;
-	MOV 	R0, #DISPLAY_D_EN
-	BL		Print_Display
-	MOV		R9, #1						;Contador display estado crescente/decrescente
+	MOV		R9, #0						;Contador display estado crescente/decrescente
 	MOV		R10, #0						;Contador display dezenas
 	MOV		R11, #0						;Contador display unidades
-	MOV		R12, #5						;Passo
+	MOV		R12, #1						;Passo
 	BL 		Fim
 
 MainLoop
-	BL 		Display_Count				;Chama a rotina para piscar LED
+	BL 		Display_Count				;Chama a rotina para printar no display
+	
+;--------------------------------------------------------------------------------
+; Função Verifica_Chaves
+; Parâmetro de entrada: Não tem
+; Parâmetro de saída: R9(crescente/decrescente), R12(passo)
+Verifica_Chaves
 	BL 		PortJ_Input				 	;Chama a subrotina que lê o estado das chaves e coloca o resultado em R0
 Verifica_Nenhuma
 	CMP		R0, #2_00000001			 	;Verifica se nenhuma chave está pressionada
@@ -70,8 +72,9 @@ Verifica_Nenhuma
 	B 		MainLoop					;Se o teste viu que nenhuma chave está pressionada, volta para o laço principal
 Verifica_SW1	
 	CMP 	R0, #2_00000000			 	;Verifica se somente a chave SW1 está pressionada
-	BNE 	MainLoop                 	;Se o teste falhou, volta para o início do laço principal
-	B 		MainLoop                   	;Volta para o laço principal
+	BNE 	Fim_Verifica_Chaves			;Se o teste falhou, volta para o início do laço principal
+Fim_Verifica_Chaves
+	BX 		LR                   		;Volta para o laço principal
 
 ;--------------------------------------------------------------------------------
 ; Função Display_Count
@@ -118,6 +121,10 @@ Print_Display_Count_Loop
 	BCC		Print_Display_Count_Loop
 	BX 		LR						 	;return
 
+;--------------------------------------------------------------------------------
+; Função Limit_Count_D
+; Parâmetro de entrada: R11(contador das unidades)
+; Parâmetro de saída: Não tem
 Limit_Count_U
 	CMP		R9, #1						;Testa se e contagem crescente ou decrescente
 	BEQ		Increase_Count_D
@@ -134,7 +141,11 @@ Decrease_Count_D
 	CMP		R10, #0						;Testa se o contador das dezenas(R10) chegou no limite
 	BLT		Limit_Count_D
 	B		Print_Display_Count
-	
+
+;--------------------------------------------------------------------------------
+; Função Limit_Count_D
+; Parâmetro de entrada: R11(contador das dezenas)
+; Parâmetro de saída: Não tem
 Limit_Count_D
 	CMP		R9, #1						;Testa se e contagem crescente ou decrescente
 	BEQ		Restart_Count_Asc
@@ -147,8 +158,11 @@ Restart_Count_Desc
 	MOV		R11, #9						;Zera o contador das unidades(R11)
 	MOV		R10, #9						;Zera o contador das dezenas(R10)
 	B		Print_Display_Count
-	
 
+;--------------------------------------------------------------------------------
+; Função Limit_Count_D (Fim do programa)
+; Parâmetro de entrada: Não tem
+; Parâmetro de saída: Não tem
 Fim
 	NOP;
 	

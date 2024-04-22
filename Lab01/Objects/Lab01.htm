@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\Lab01.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\Lab01.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6160001: Last Updated: Sun Apr 21 20:17:31 2024
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6160001: Last Updated: Sun Apr 21 21:10:34 2024
 <BR><P>
 <H3>Maximum Stack Usage =          0 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -14,9 +14,9 @@ Functions with no stack information
 </H3><UL>
  <LI><a href="#[0]">Reset_Handler</a>
  <LI><a href="#[70]">GPIO_Init</a>
- <LI><a href="#[74]">PortN_Output</a>
- <LI><a href="#[73]">PortJ_Input</a>
- <LI><a href="#[72]">Print_Display</a>
+ <LI><a href="#[73]">PortN_Output</a>
+ <LI><a href="#[72]">PortJ_Input</a>
+ <LI><a href="#[74]">Print_Display</a>
  <LI><a href="#[71]">HABILITAR_LEDS</a>
  <LI><a href="#[6c]">ACENDER_LED_ESTADO</a>
  <LI><a href="#[6b]">Start</a>
@@ -522,15 +522,15 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Start
 </UL>
 
-<P><STRONG><a name="[74]"></a>PortN_Output</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, gpio.o(.text))
+<P><STRONG><a name="[73]"></a>PortN_Output</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, gpio.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Start
 </UL>
 
-<P><STRONG><a name="[73]"></a>PortJ_Input</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, gpio.o(.text))
+<P><STRONG><a name="[72]"></a>PortJ_Input</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, gpio.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Start
 </UL>
 
-<P><STRONG><a name="[72]"></a>Print_Display</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, gpio.o(.text))
+<P><STRONG><a name="[74]"></a>Print_Display</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, gpio.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Start
 </UL>
 
@@ -547,9 +547,9 @@ Global Symbols
 <LI><a href="#[6e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PLL_Init
 <LI><a href="#[6d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Wait1ms
 <LI><a href="#[71]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HABILITAR_LEDS
-<LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Print_Display
-<LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PortJ_Input
-<LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PortN_Output
+<LI><a href="#[74]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Print_Display
+<LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PortJ_Input
+<LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PortN_Output
 <LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_Init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Handler
