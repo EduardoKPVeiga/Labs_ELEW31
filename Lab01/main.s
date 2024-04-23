@@ -203,6 +203,7 @@ Est_cres_ou_descres
 	CMP 	R9, #1
 	BEQ 	DESCRESCENTE
 	MOV		R9,	#1
+	MOV		R7,#2_11
 	BX		LR
 DESCRESCENTE
 	MOV		R9, #0
