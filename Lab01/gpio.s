@@ -11,6 +11,7 @@
 ; Definições de Valores
 BIT0	EQU 2_0001
 BIT1	EQU 2_0010
+TIME_SWAP	EQU	0xFFF
 ; ========================
 ; Definições dos Registradores Gerais
 SYSCTL_RCGCGPIO_R	 EQU	0x400FE608
@@ -176,7 +177,7 @@ GPIO_PORTB_AHB_WAKELVL_R    EQU 0x40059544
 GPIO_PORTB_AHB_WAKESTAT_R   EQU 0x40059548 
 GPIO_PORTB_AHB_PP_R         EQU 0x40059FC0 
 GPIO_PORTB_AHB_PC_R         EQU 0x40059FC4
-GPIO_PORTB					EQU	2_
+GPIO_PORTB					EQU	2_000000000000010
 
 
 ; -------------------------------------------------------------------------------
@@ -191,6 +192,9 @@ GPIO_PORTB					EQU	2_
 		EXPORT 	ACENDER_LED_ESTADO
 		EXPORT 	HABILITAR_LEDS
 		EXPORT	Print_Display
+		EXPORT	SWAP_BETWEEN_DISPLAY_AND_LEDS
+		EXPORT	INICIALIZA_CONTROLE
+		EXPORT	MOVER_LEDS
 		IMPORT  SysTick_Wait1ms	
 									
 
@@ -225,11 +229,13 @@ EsperaGPIO  LDR     R1, [R0]						;Lê da memória o conteúdo do endereço do regis
  
 ; 2. Limpar o AMSEL para desabilitar a analógica
 			MOV     R1, #0x00;
-            LDR     R0, =GPIO_PORTA_AHB_AMSEL_R     ;Carrega o R0 com o endereço do AMSEL para a porta J
+			LDR     R0, =GPIO_PORTJ_AHB_AMSEL_R     ;Carrega o R0 com o endereço do AMSEL para a porta J
             STR     R1, [R0]
-			LDR     R0, =GPIO_PORTP_AMSEL_R			;Carrega o R0 com o endereço do AMSEL para a porta N
+            LDR     R0, =GPIO_PORTA_AHB_AMSEL_R     ;Carrega o R0 com o endereço do AMSEL para a porta A
             STR     R1, [R0]
-			LDR     R0, =GPIO_PORTQ_AMSEL_R			;Carrega o R0 com o endereço do AMSEL para a porta N
+			LDR     R0, =GPIO_PORTP_AMSEL_R			;Carrega o R0 com o endereço do AMSEL para a porta P
+            STR     R1, [R0]
+			LDR     R0, =GPIO_PORTQ_AMSEL_R			;Carrega o R0 com o endereço do AMSEL para a porta Q
             STR     R1, [R0]
  
 ; 3. Limpar PCTL para selecionar o GPIO
@@ -242,7 +248,7 @@ EsperaGPIO  LDR     R1, [R0]						;Lê da memória o conteúdo do endereço do regis
             STR     R1, [R0]
 			LDR     R0, =GPIO_PORTP_PCTL_R      	;Carrega o R0 com o endereço do PCTL para a porta P
             STR     R1, [R0]
-			LDR     R0, =GPIO_PORTB_AHB_PCTL_R      	;Carrega o R0 com o endereço do PCTL para a porta B
+			LDR     R0, =GPIO_PORTB_AHB_PCTL_R      ;Carrega o R0 com o endereço do PCTL para a porta B
             STR     R1, [R0]
 			LDR     R0, =GPIO_PORTQ_PCTL_R      	;Carrega o R0 com o endereço do PCTL para a porta Q
             STR     R1, [R0]
@@ -263,7 +269,7 @@ EsperaGPIO  LDR     R1, [R0]						;Lê da memória o conteúdo do endereço do regis
 			MOV     R1, #2_00100000					;PP5
             STR     R1, [R0]
 			
-			LDR     R0, =GPIO_PORTP_DIR_R			;Carrega o R0 com o endereço do DIR para a porta B
+			LDR     R0, =GPIO_PORTB_AHB_DIR_R			;Carrega o R0 com o endereço do DIR para a porta B
 			MOV     R1, #2_00110000					;PB5, PB4
             STR     R1, [R0]
 			
@@ -291,7 +297,7 @@ EsperaGPIO  LDR     R1, [R0]						;Lê da memória o conteúdo do endereço do regis
             STR     R1, [R0]							;Escreve no registrador da memória funcionalidade digital 
  
             LDR     R0, =GPIO_PORTJ_AHB_DEN_R			;Carrega o endereço do DEN
-			MOV     R1, #2_00000001                     ;J0     
+			MOV     R1, #2_00000011                     ;J1J0     
             STR     R1, [R0]                            ;Escreve no registrador da memória funcionalidade digital
 			
 			LDR     R0, =GPIO_PORTA_AHB_DEN_R			;Carrega o endereço do DEN
@@ -312,7 +318,7 @@ EsperaGPIO  LDR     R1, [R0]						;Lê da memória o conteúdo do endereço do regis
 			
 ; 7. Para habilitar resistor de pull-up interno, setar PUR para 1
 			LDR     R0, =GPIO_PORTJ_AHB_PUR_R			;Carrega o endereço do PUR para a porta J
-			MOV     R1, #2_1							;Habilitar funcionalidade digital de resistor de pull-up 
+			MOV     R1, #2_00000011						;Habilitar funcionalidade digital de resistor de pull-up 
             STR     R1, [R0]							;Escreve no registrador da memória do resistor de pull-up
 			BX      LR
 
@@ -340,17 +346,15 @@ PortJ_Input
 	
 ; -------------------------------------------------------------------------------
 ; Fun??o Print_Display
-; Par?metro de entrada: R2
+; Par?metro de entrada: R0(Display Enable), R2(Value)
 ; Par?metro de sa?da: N?o Tem
 Print_Display
-
-	LDR	R1, =GPIO_PORTP_DATA_R
-	MOV R0, #0
-	STR R0, [R1]							;Desabilita o transistor Q1
 	LDR	R1, =GPIO_PORTB_AHB_DATA_R
-	MOV R0, #2_00110000
 	STR R0, [R1]							;Habilita os transistores Q2 e Q3
-
+	MOV	R0,#0
+	LDR	R1, =GPIO_PORTP_DATA_R
+	STR R0, [R1]							;Desabilita o transistor Q1
+	
 	LDR	R1, =GPIO_PORTQ_DATA_R
 	STR	R0,[R1];
 	
@@ -379,61 +383,63 @@ Print_Display
 	BEQ		Display_9
 	
 Print_Ports
+	
 	LDR		R1, =GPIO_PORTA_AHB_DATA_R
 	STR 	R4, [R1]
 	LDR		R1, =GPIO_PORTQ_DATA_R
 	STR 	R3, [R1]
+	
 	BX 		LR									;Retorno
 	
 Display_0
 	MOV		R3, #2_00001111
 	MOV		R4, #2_00110000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_1
 	MOV		R3, #2_00000110
 	MOV		R4, #2_00000000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_2
 	MOV		R3, #2_00001011
 	MOV		R4, #2_01010000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_3
 	MOV		R3, #2_00001111
 	MOV		R4, #2_01000000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_4
 	MOV		R3, #2_00000110
 	MOV		R4, #2_01100000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_5
 	MOV		R3, #2_00001101
 	MOV		R4, #2_01100000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_6
-	MOV		R3, #2_00001111
-	MOV		R4, #2_01100000
-	BL		Print_Ports
+	MOV		R3, #2_00001101
+	MOV		R4, #2_01110000
+	B		Print_Ports
 	
 Display_7
 	MOV		R3, #2_00000111
 	MOV		R4, #2_00000000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_8
 	MOV		R3, #2_00001111
 	MOV		R4, #2_01110000
-	BL		Print_Ports
+	B		Print_Ports
 	
 Display_9
 	MOV		R3, #2_00001111
 	MOV		R4, #2_01100000
-	BL		Print_Ports
+	B		Print_Ports
 
 ; -------------------------------------------------------------------------------
 ; Função HABILITAR_LEDS
@@ -443,22 +449,31 @@ HABILITAR_LEDS
 	LDR	R1, =GPIO_PORTP_DATA_R
 	MOV R0, #2_100000
 	STR R0, [R1]
+	LDR	R1,=GPIO_PORTB_AHB_DATA_R
+	MOV	R0,	#0
+	STR R0,[R1]
 	BX LR
 
-; -------------------------------------------------------------------------------
-; Função ACENDER_LED_ESTADO
-; Parâmetro de entrada:
-; Parâmetro de saída:
 ACENDER_LED_ESTADO
-	PUSH {LR}
-	CMP	R7, #0
+	PUSH{LR}
+	BL	HABILITAR_LEDS
+	POP{LR}
+	CMP	R8, #0
 	BEQ EST_LED_0
-	CMP	R7, #1
+	CMP	R8, #1
 	BEQ EST_LED_1
-	CMP	R7, #2
+	CMP	R8, #2
 	BEQ EST_LED_2
-	CMP	R7, #3
+	CMP	R8, #3
 	BEQ EST_LED_3
+	CMP	R8, #4
+	BEQ EST_LED_4
+	CMP	R8, #5
+	BEQ EST_LED_5
+	CMP	R8, #6
+	BEQ EST_LED_6
+	CMP	R8, #7
+	BEQ EST_LED_7
 	
 EST_LED_0
 	LDR	R1, =GPIO_PORTA_AHB_DATA_R
@@ -498,23 +513,95 @@ EST_LED_3
 	LDR	R1, =GPIO_PORTQ_DATA_R
 	MOV	R0,	#2_01000;
 	STR	R0,[R1];
-;ENTRADA: R0 - QUANTIDADE MS A SE PASSA
-DELAY
-	PUSH {LR}
-	MOV R1, #0;
-WAIT
+	B	RET
+
+EST_LED_4
+	LDR	R1, =GPIO_PORTA_AHB_DATA_R
+	MOV	R0,	#2_00010000;
+	STR	R0,[R1];
 	
-	ADD R1, R1, #1;
-	CMP R1 , R0
-	BNE WAIT
+	LDR	R1, =GPIO_PORTQ_DATA_R
+	MOV	R0,	#2_01000;
+	STR	R0,[R1];
+	B	RET
+
+EST_LED_5
+	LDR	R1, =GPIO_PORTA_AHB_DATA_R
+	MOV	R0,	#2_00100000;
+	STR	R0,[R1];
+	
+	LDR	R1, =GPIO_PORTQ_DATA_R
+	MOV	R0,	#2_00100;
+	STR	R0,[R1];
+	B RET
+	
+EST_LED_6
+	LDR	R1, =GPIO_PORTA_AHB_DATA_R
+	MOV	R0,	#2_01000000;
+	STR	R0,[R1];
+	
+	LDR	R1, =GPIO_PORTQ_DATA_R
+	MOV	R0,	#2_00010;
+	STR	R0,[R1];
+	B RET
+	
+EST_LED_7
+	LDR	R1, =GPIO_PORTA_AHB_DATA_R
+	MOV	R0,	#2_10000000;
+	STR	R0,[R1];
+	
+	LDR	R1, =GPIO_PORTQ_DATA_R
+	MOV	R0,	#2_00001;
+	STR	R0,[R1];
+	B RET
+RET
+	BX LR 
+;GPIO_PORTB_AHB_DATA_R
+SWAP_BETWEEN_DISPLAY_AND_LEDS
+	; PARTE 01 - INVERTER OS BITS DE CONTROLE DOS TRANSISTORES DO LED E DO DISPLAY
+	; TROCA O BIT DE CONTROLE DO LED
+	LDR R5,=GPIO_PORTP_DATA_R;
+	LDR R0,[R5]
+	MOV R6,#2_100000;
+	BIC R0,R6,R0;
+	STR R0,[R5];
+	; TROCA O BITS DE CONTROLE DO DISPLAY 7 SEGMENTOS
+	LDR R5,=GPIO_PORTB_AHB_DATA_R;
+	LDR R0,[R5];
+	MOV R6,#2_110000;
+	BIC R0,R6,R0;
+	STR R0,[R5];
+	;PROVOCA UM DELAY
+	MOV R0, #TIME_SWAP;
+	PUSH{LR}
 	BL SysTick_Wait1ms;
 	POP{LR}
+	BX 	LR;
+;
+INICIALIZA_CONTROLE
+	;LEDS apagado
+	LDR R5,=GPIO_PORTP_DATA_R;
+	MOV	R0,#2_000000;
+	STR R0,[R5];
+	;DISPLAY ligado
+	LDR R5,=GPIO_PORTB_AHB_DATA_R;
+	MOV R0, #2_110000
+	STR R0,[R5]
 	BX	LR
-
-RET
-	POP {LR}
-	BX LR									;Retorno
-
+	
+;--------------------------------------------------------------------------------
+; Função MOVER_LEDS
+; Parâmetro de entrada: Não tem
+; Parâmetro de saída: Não tem
+MOVER_LEDS
+	CMP		R8, #7
+	BEQ		return_initial_leds_state
+	ADD		R8,R8,#1;
+	BX 		LR;		retorna para o fim da função mover_leds
+return_initial_leds_state
+	MOV 	R8, #0;
+	BX 		LR;		retorna para o fim da função mover_leds
+	
     ALIGN                           ; garante que o fim da seção está alinhada 
     END                             ; fim do arquivo
 	
