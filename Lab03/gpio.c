@@ -8,6 +8,7 @@
 
 #include "tm4c1294ncpdt.h"
   
+#define GPIO_PORTA  (0x0001) //bit 1
 #define GPIO_PORTJ  (0x0100) //bit 8
 #define GPIO_PORTN  (0x1000) //bit 12
 
@@ -21,11 +22,12 @@ void SysTick_Wait1ms(uint32_t delay);
 void GPIO_Init(void)
 {
 	//1a. Ativar o clock para a porta setando o bit correspondente no registrador RCGCGPIO
-	SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTN);
+	SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA);
 	//1b.   após isso verificar no PRGPIO se a porta está pronta para uso.
-  while((SYSCTL_PRGPIO_R & (GPIO_PORTJ | GPIO_PORTN) ) != (GPIO_PORTJ | GPIO_PORTN) ){};
+  while((SYSCTL_PRGPIO_R & (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA) ) != (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA) ){};
 	
 	// 2. Limpar o AMSEL para desabilitar a analógica
+	GPIO_PORTA_AHB_AMSEL_R = 0x00;
 	GPIO_PORTJ_AHB_AMSEL_R = 0x00;
 	GPIO_PORTN_AMSEL_R = 0x00;
 		
@@ -38,15 +40,20 @@ void GPIO_Init(void)
 	GPIO_PORTN_DIR_R = 0x03; //BIT0 | BIT1
 		
 	// 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem função alternativa	
+	GPIO_PORTA_AHB_AFSEL_R = 0x03;
 	GPIO_PORTJ_AHB_AFSEL_R = 0x00;
-	GPIO_PORTN_AFSEL_R = 0x00; 
+	GPIO_PORTN_AFSEL_R = 0x00;
 		
 	// 6. Setar os bits de DEN para habilitar I/O digital	
+	GPIO_PORTA_AHB_DEN_R = 0x02;   //Bit0 e bit1
 	GPIO_PORTJ_AHB_DEN_R = 0x03;   //Bit0 e bit1
 	GPIO_PORTN_DEN_R = 0x03; 		   //Bit0 e bit1
 	
 	// 7. Habilitar resistor de pull-up interno, setar PUR para 1
-	GPIO_PORTJ_AHB_PUR_R = 0x03;   //Bit0 e bit1	
+	GPIO_PORTJ_AHB_PUR_R = 0x03;   //Bit0 e bit1
+	
+	// Função alternativa dos pinos A0 e A1
+	GPIO_PORTA_AHB_PCTL_R = 0x11;
 	
 	// Uart run mode clock gating control
 	SYSCTL_RCGCUART_R = SYSCTL_RCGCUART_R0;
@@ -68,6 +75,7 @@ void GPIO_Init(void)
 	
 	// Uart control
 	UART0_CTL_R = UART0_CTL_R | 0x301;
+}
 
 // -------------------------------------------------------------------------------
 // Função PortJ_Input
