@@ -192,8 +192,6 @@ GPIO_PORTB					EQU	2_000000000000010
 		EXPORT 	ACENDER_LED_ESTADO
 		EXPORT 	HABILITAR_LEDS
 		EXPORT	Print_Display
-		EXPORT	SWAP_BETWEEN_DISPLAY_AND_LEDS
-		EXPORT	INICIALIZA_CONTROLE
 		EXPORT	MOVER_LEDS
 		IMPORT  SysTick_Wait1ms	
 									
@@ -342,6 +340,12 @@ PortN_Output
 PortJ_Input
 	LDR	R1, =GPIO_PORTJ_AHB_DATA_R		    ;Carrega o valor do offset do data register
 	LDR R0, [R1]                            ;Lê no barramento de dados dos pinos [J0]
+	CMP	R0, R5
+	ITEE	EQ
+		MOVEQ	R5, R0
+		MOVNE	R5, R0
+		MOVNE	R7, R0
+PortJ_Input_End
 	BX LR									;Retorno
 	
 ; -------------------------------------------------------------------------------
@@ -557,38 +561,7 @@ EST_LED_7
 RET
 	BX LR 
 ;GPIO_PORTB_AHB_DATA_R
-SWAP_BETWEEN_DISPLAY_AND_LEDS
-	; PARTE 01 - INVERTER OS BITS DE CONTROLE DOS TRANSISTORES DO LED E DO DISPLAY
-	; TROCA O BIT DE CONTROLE DO LED
-	LDR R5,=GPIO_PORTP_DATA_R;
-	LDR R0,[R5]
-	MOV R6,#2_100000;
-	BIC R0,R6,R0;
-	STR R0,[R5];
-	; TROCA O BITS DE CONTROLE DO DISPLAY 7 SEGMENTOS
-	LDR R5,=GPIO_PORTB_AHB_DATA_R;
-	LDR R0,[R5];
-	MOV R6,#2_110000;
-	BIC R0,R6,R0;
-	STR R0,[R5];
-	;PROVOCA UM DELAY
-	MOV R0, #TIME_SWAP;
-	PUSH{LR}
-	BL SysTick_Wait1ms;
-	POP{LR}
-	BX 	LR;
-;
-INICIALIZA_CONTROLE
-	;LEDS apagado
-	LDR R5,=GPIO_PORTP_DATA_R;
-	MOV	R0,#2_000000;
-	STR R0,[R5];
-	;DISPLAY ligado
-	LDR R5,=GPIO_PORTB_AHB_DATA_R;
-	MOV R0, #2_110000
-	STR R0,[R5]
-	BX	LR
-	
+
 ;--------------------------------------------------------------------------------
 ; Função MOVER_LEDS
 ; Parâmetro de entrada: Não tem

@@ -39,8 +39,6 @@ DISPLAY_D_EN	EQU	2_00010000
 		IMPORT 	ACENDER_LED_ESTADO
 		IMPORT 	HABILITAR_LEDS
 		IMPORT 	Print_Display
-		IMPORT	SWAP_BETWEEN_DISPLAY_AND_LEDS
-		IMPORT	INICIALIZA_CONTROLE
 		IMPORT	MOVER_LEDS
 
 ; -------------------------------------------------------------------------------
@@ -49,22 +47,15 @@ Start
 	BL 		PLL_Init                  	;Chama a subrotina para alterar o clock do microcontrolador para 80MHz
 	BL 		SysTick_Init
 	BL 		GPIO_Init                 	;Chama a subrotina que inicializa os GPIO
-;	BL 		HABILITAR_LEDS
-;	MOV 	R7,#3;
-;	BL 		ACENDER_LED_ESTADO
 	MOV		R7,	#2_11;					;Estado anterior da port J(verificar sw1(j0) e sw2(j1) mudaram de estados)
 	MOV		R8, #7;						;Estado inicial das leds
 	MOV		R9, #1						;Contador display estado crescente/decrescente
 	MOV		R10, #0						;Contador display dezenas
 	MOV		R11, #0						;Contador display unidades
 	MOV		R12, #1						;Passo
-;	BL		INICIALIZA_CONTROLE			;Acende as leds e deixa apagado o display
-;	BL 		Fim
 
 MainLoop
-	PUSH	{LR}
-	BL		VERIFICAR_BOTOES
-	POP		{LR}
+	BL		PortJ_Input
 	BL		EXECUTAR_BUFFER_BOTAO
 	BL		MOVER_LEDS
 	BL 		Display_Count				;Chama a rotina para printar no display
@@ -120,7 +111,7 @@ Print_Display_Count_Loop
 	POP		{LR}
 	
 	PUSH	{LR}
-	BL		VERIFICAR_BOTOES
+	BL		PortJ_Input
 	POP		{LR}
 	
 	ADD		R6, #1
