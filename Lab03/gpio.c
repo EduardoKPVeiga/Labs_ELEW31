@@ -103,6 +103,19 @@ void PortN_Output(uint32_t valor)
     GPIO_PORTN_DATA_R = temp; 
 }
 
+uint8_t ReadRX()
+{
+	while ((UART0_FR_R && 0x10) == 0x10)
+		SysTick_Wait1ms(1);
+	uint8_t value = UART0_DR_R;
+	return value;
+}
 
+void WriteTX(uint8_t value)
+{
+	while ((UART0_FR_R && 0x20) == 0x20)
+		SysTick_Wait1ms(1);
+	UART0_DR_R = value;
+}
 
 
