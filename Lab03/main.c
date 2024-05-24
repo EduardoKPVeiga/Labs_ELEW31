@@ -14,6 +14,8 @@ void GPIO_Init(void);
 uint32_t PortJ_Input(void);
 void PortN_Output(uint32_t leds);
 void Pisca_leds(void);
+void WriteTX(uint8_t value);
+uint8_t ReadRX(void);
 
 int main(void)
 {
@@ -22,18 +24,9 @@ int main(void)
 	GPIO_Init();
 	while (1)
 	{
-    //Se a USR_SW2 estiver pressionada
-		if (PortJ_Input() == 0x1)
-			PortN_Output(0x1);
-    //Se a USR_SW1 estiver pressionada
-		else if (PortJ_Input() == 0x2)
-			PortN_Output(0x2);
-    //Se ambas estiverem pressionadas
-		else if (PortJ_Input() == 0x0)
-			Pisca_leds();
-    //Se nenhuma estiver pressionada
-		else if (PortJ_Input() == 0x3)
-			PortN_Output(0x0);        
+		uint8_t var = ReadRX();
+		SysTick_Wait1ms(1000);
+    WriteTX(var);
 	}
 }
 

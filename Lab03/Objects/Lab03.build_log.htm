@@ -17,120 +17,20 @@ Library Manager: ArmAr.exe V6.21
 Hex Converter:   FromElf.exe V6.21
 CPU DLL:         SARMCM3.DLL V5.39.0.0
 Dialog DLL:      DCM.DLL V1.17.5.0
-Target DLL:      UL2CM3.DLL V1.164.9.0
+Target DLL:      lmidk-agdi.dll V???
 Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 C:\Users\epont\OneDrive\Documentos\UTFPR\2024.1\SistemasMicrocontrolados\laboratorios\Labs_ELEW31\Lab03\Lab03.uvprojx
-Project File Date:  05/21/2024
+Project File Date:  05/24/2024
 
 <h2>Output:</h2>
 *** Using Compiler 'V6.21', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
 Build target 'Target 1'
-gpio.c(18): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   18 | // Fun<E7><E3>o GPIO_Init
-      |       ^
-gpio.c(20): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   20 | // Par<E2>metro de entrada: N<E3>o tem
-      |       ^
-gpio.c(20): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   20 | // Par<E2>metro de entrada: N<E3>o tem
-      |                              ^
-gpio.c(21): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   21 | // Par<E2>metro de sa<ED>da: N<E3>o tem
-      |       ^
-gpio.c(21): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   21 | // Par<E2>metro de sa<ED>da: N<E3>o tem
-      |                      ^
-gpio.c(21): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   21 | // Par<E2>metro de sa<ED>da: N<E3>o tem
-      |                               ^
-gpio.c(26): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   26 |         //1b.   ap<F3>s isso verificar no PRGPIO se a porta est<E1> pronta para uso.
-      |                   ^
-gpio.c(26): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   26 |         //1b.   ap<F3>s isso verificar no PRGPIO se a porta est<E1> pronta para uso.
-      |                                                                ^
-gpio.c(29): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   29 |         // 2. Limpar o AMSEL para desabilitar a anal<F3>gica
-      |                                                     ^
-gpio.c(27): warning: empty expression statement has no effect; remove unnecessary ';' to silence this warning [-Wextra-semi-stmt]
-   27 |   while((SYSCTL_PRGPIO_R & (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA) ) != (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA) ){};
-      |                                                                                                                  ^
-gpio.c(38): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   38 |         // 4. DIR para 0 se for entrada, 1 se for sa<ED>da
-      |                                                     ^
-gpio.c(42): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   42 |         // 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem fun<E7><E3>o alternativa   
-      |                                                                       ^
-gpio.c(53): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   53 |         // Fun<E7><E3>o alternativa dos pinos A0 e A1
-      |               ^
-gpio.c(79): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   79 | // Fun<E7><E3>o PortJ_Input
-      |       ^
-gpio.c(80): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   80 | // L<EA> os valores de entrada do port J
-      |     ^
-gpio.c(81): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   81 | // Par<E2>metro de entrada: N<E3>o tem
-      |       ^
-gpio.c(81): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   81 | // Par<E2>metro de entrada: N<E3>o tem
-      |                              ^
-gpio.c(82): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   82 | // Par<E2>metro de sa<ED>da: o valor da leitura do port
-      |       ^
-gpio.c(82): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   82 | // Par<E2>metro de sa<ED>da: o valor da leitura do port
-      |                      ^
-gpio.c(22): warning: no previous prototype for function 'GPIO_Init' [-Wmissing-prototypes]
-   22 | void GPIO_Init(void)
-      |      ^
-gpio.c(22): note: declare 'static' if the function is not intended to be used outside of this translation unit
-   22 | void GPIO_Init(void)
-      | ^
-      | static 
-gpio.c(89): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   89 | // Fun<E7><E3>o PortN_Output
-      |       ^
-gpio.c(91): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   91 | // Par<E2>metro de entrada: Valor a ser escrito
-      |       ^
-gpio.c(92): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   92 | // Par<E2>metro de sa<ED>da: n<E3>o tem
-      |       ^
-gpio.c(92): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   92 | // Par<E2>metro de sa<ED>da: n<E3>o tem
-      |                      ^
-gpio.c(92): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   92 | // Par<E2>metro de sa<ED>da: n<E3>o tem
-      |                               ^
-gpio.c(83): warning: no previous prototype for function 'PortJ_Input' [-Wmissing-prototypes]
-   83 | uint32_t PortJ_Input(void)
-      |          ^
-gpio.c(83): note: declare 'static' if the function is not intended to be used outside of this translation unit
-   83 | uint32_t PortJ_Input(void)
-      | ^
-      | static 
-gpio.c(97): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   97 |     //para uma escrita amig<E1>vel nos bits 0 e 1
-      |                            ^
-gpio.c(99): warning: invalid UTF-8 in comment [-Winvalid-utf8]
-   99 |     //agora vamos fazer o OR com o valor recebido na fun<E7><E3>o
-      |                                                         ^
-gpio.c(93): warning: no previous prototype for function 'PortN_Output' [-Wmissing-prototypes]
-   93 | void PortN_Output(uint32_t valor)
-      |      ^
-gpio.c(93): note: declare 'static' if the function is not intended to be used outside of this translation unit
-   93 | void PortN_Output(uint32_t valor)
-      | ^
-      | static 
-29 warnings generated.
-compiling gpio.c...
+compiling main.c...
 linking...
 Program Size: Code=1896 RO-data=16 RW-data=0 ZI-data=1120  
-".\Objects\Lab03.axf" - 0 Error(s), 29 Warning(s).
+".\Objects\Lab03.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -143,7 +43,7 @@ Package Vendor: Keil
   C:/Users/epont/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:00
 </pre>
 </body>
 </html>
