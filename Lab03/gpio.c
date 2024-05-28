@@ -22,6 +22,9 @@ uint8_t ReadRX(void);
 void clean_putty(void);
 void move_cursor_beginning_putty(void);
 void Write_line_putty(char* line);
+void Pisca_leds(void);
+void Timer0A_Handler(void);
+
 // -------------------------------------------------------------------------------
 // Função GPIO_Init
 // Inicializa os ports J e N
@@ -29,6 +32,46 @@ void Write_line_putty(char* line);
 // Parâmetro de saída: Não tem
 void GPIO_Init(void)
 {
+	// Contar ate 8.000.000
+	// 16 bits, prescale de 8 bits
+	// GPTMTAILR = 7.999.999
+	
+	// Timer 0
+	SYSCTL_RCGCTIMER_R = 0x1;
+	
+	// Espera o timer estar pronto
+	while ((SYSCTL_PRTIMER_R & 0x01) != 0x01);
+	
+	// 0xFF.FF.FE.FE, desabilita o timer A
+	TIMER0_CTL_R &= 0xFFFFFFFE;
+	
+	// Timer no modo 32 bits
+	TIMER0_CFG_R = 0x0;
+	
+	// Modo periódico
+	TIMER0_TAMR_R = 0x2;
+	
+	// Timeout de 7.999.999 clocks
+	TIMER0_TAILR_R = 0x7A11FF;
+	
+	// Usado apenas para o prescale
+	TIMER0_TAPR_R = 0x00;
+	
+	// Configuração da interrupção
+	TIMER0_ICR_R = 0x1;
+	
+	// Interrupção no timeout
+	TIMER0_IMR_R = 0x00000001;
+	
+	// Prioridade da interrupção
+	NVIC_PRI4_R = (uint32_t)4 << (uint32_t)29;
+	
+	// Habilita a interrupção do timer
+	NVIC_EN0_R = (uint32_t)1 << (uint32_t)19;
+	
+	// Habilita o timer A
+	TIMER0_CTL_R |= 0x01;
+	
 	//1a. Ativar o clock para a porta setando o bit correspondente no registrador RCGCGPIO
 	SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA);
 	//1b.   após isso verificar no PRGPIO se a porta está pronta para uso.
@@ -136,6 +179,13 @@ void PortN_Output(uint32_t valor)
     GPIO_PORTN_DATA_R = temp; 
 }
 
+void Timer0A_Handler()
+{
+	// Limpar o flag de interrupção
+	TIMER0_ICR_R = 0x01;
+	Pisca_leds();
+}
+
 uint8_t ReadRX(void)
 {
 	// bit 4 => RXFE indica que não é possivel a leitura
@@ -174,4 +224,10 @@ void Write_line_putty(char* line) {
 		line++;
 	}
 	//WriteTX('\n');
+}
+
+void Pisca_leds()
+{
+	PortN_Output(GPIO_PORTN_DATA_R ^ 0x03);
+	//WriteTX('A');
 }

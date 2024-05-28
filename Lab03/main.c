@@ -29,6 +29,7 @@ int main(void)
 	uint8_t var = 0x00;
 	while (1)
 	{
+		/*
 		Write_line_putty("Digite um comando:");
 		var = ReadRX();
 		clean_putty();
@@ -50,17 +51,10 @@ int main(void)
 		//acender_ledsN(0x03);
 		//SysTick_Wait1ms(3000);
     //WriteTX(var);
+		*/
 	}
 }
 
 void acender_ledsN(uint8_t vn) {
 	PortN_Output(vn);
-}
-
-void Pisca_leds(void)
-{
-	PortN_Output(0x2);
-	SysTick_Wait1ms(250);
-	PortN_Output(0x1);
-	SysTick_Wait1ms(250);
 }
