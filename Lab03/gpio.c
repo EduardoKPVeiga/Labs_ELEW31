@@ -11,6 +11,7 @@
  // EDCBA9876543210
 #define GPIO_PORTA  (0x0001) //bit 0
 #define GPIO_PORTJ  (0x0100) //bit 8
+#define GPIO_PORTH	(0x0080) //bit 7 0000 0000 1000 0000
 #define GPIO_PORTN  (0x1000) //bit 12
 
 void SysTick_Wait1ms(uint32_t delay);
@@ -22,6 +23,9 @@ uint8_t ReadRX(void);
 void clean_putty(void);
 void move_cursor_beginning_putty(void);
 void Write_line_putty(char* line);
+void MotorUnipolarPasso(uint32_t num_passos);
+void MotorUnipolarPasso1Volta(void);
+void MotorUnipolarMeioPasso(uint32_t num_passos);
 // -------------------------------------------------------------------------------
 // Função GPIO_Init
 // Inicializa os ports J e N
@@ -30,37 +34,42 @@ void Write_line_putty(char* line);
 void GPIO_Init(void)
 {
 	//1a. Ativar o clock para a porta setando o bit correspondente no registrador RCGCGPIO
-	SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA);
+	SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTH);
 	//1b.   após isso verificar no PRGPIO se a porta está pronta para uso.
-  while((SYSCTL_PRGPIO_R & (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA) ) != (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA) ){}
+  while((SYSCTL_PRGPIO_R & (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTH) ) != (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTH) ){}
 	
 	// 2. Limpar o AMSEL para desabilitar a analógica
 	GPIO_PORTA_AHB_AMSEL_R = 0x00;
 	GPIO_PORTJ_AHB_AMSEL_R = 0x00;
+	GPIO_PORTH_AHB_AMSEL_R = 0x00;
 	GPIO_PORTN_AMSEL_R = 0x00;
 		
 	// 3. Limpar PCTL para selecionar o GPIO
 	GPIO_PORTA_AHB_PCTL_R = 0x11;
 	GPIO_PORTJ_AHB_PCTL_R = 0x00;
+	GPIO_PORTH_AHB_PCTL_R = 0x00;
 	GPIO_PORTN_PCTL_R = 0x00;
 
 	// 4. DIR para 0 se for entrada, 1 se for saída
 	GPIO_PORTA_AHB_DIR_R = 0x00;
 	GPIO_PORTJ_AHB_DIR_R = 0x00;
+	GPIO_PORTH_AHB_DIR_R = 0x0F;	// H3 ~ H0
 	GPIO_PORTN_DIR_R = 0x03; //BIT0 | BIT1
 		
 	// 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem função alternativa	
 	GPIO_PORTA_AHB_AFSEL_R = 0x03;
 	GPIO_PORTJ_AHB_AFSEL_R = 0x00;
+	GPIO_PORTH_AHB_AFSEL_R = 0x00;
 	GPIO_PORTN_AFSEL_R = 0x00;
 		
 	// 6. Setar os bits de DEN para habilitar I/O digital	
-	GPIO_PORTA_AHB_DEN_R = 0x03;   //Bit0 = entrada e bit1 = saida
-	GPIO_PORTJ_AHB_DEN_R = 0x03;   //Bit0 e bit1
-	GPIO_PORTN_DEN_R = 0x03; 		   //Bit0 e bit1
+	GPIO_PORTA_AHB_DEN_R = 0x03;   	//Bit0 = entrada e bit1 = saida
+	GPIO_PORTJ_AHB_DEN_R = 0x03;		//Bit0 e bit1
+	GPIO_PORTH_AHB_DEN_R = 0x0F;		// PH3 ~ PH0
+	GPIO_PORTN_DEN_R = 0x03; 		   	//Bit0 e bit1
 	
 	// 7. Habilitar resistor de pull-up interno, setar PUR para 1
-	GPIO_PORTJ_AHB_PUR_R = 0x03;   //Bit0 e bit1
+	GPIO_PORTJ_AHB_PUR_R = 0x03;   	//Bit0 e bit1
 	
 	// Função alternativa dos pinos A0 e A1
 	GPIO_PORTA_AHB_PCTL_R = 0x11;
@@ -136,42 +145,9 @@ void PortN_Output(uint32_t valor)
     GPIO_PORTN_DATA_R = temp; 
 }
 
-uint8_t ReadRX(void)
-{
-	// bit 4 => RXFE indica que não é possivel a leitura
-	while ((UART0_FR_R & 0x10) == 0x10){}	// 0001 0000 => verifica se é possivel a leitura
-		//SysTick_Wait1ms(1);
-	uint8_t value = (uint8_t)UART0_DR_R;
-	return value;
-}
-
-// inicia a transmissão de dados
-void WriteTX(char value)
-{
-	// bit 5 => TXFF indica que não é possivel a escrita
-	while ((UART0_FR_R & 0x20) == 0x20){} // 0010 0000 => verifica se é possivel a escrita
-		//SysTick_Wait1ms(1);
-	UART0_DR_R = (char)value;
-}
-
-void clean_putty(void) {
-	WriteTX(0x1B);
-	WriteTX('[');
-	WriteTX('2');
-	WriteTX('J');
-}
-
-void move_cursor_beginning_putty(void) {
-	WriteTX(0x1B);
-	WriteTX('[');
-	WriteTX(';');
-	WriteTX('H');
-}
-
-void Write_line_putty(char* line) {
-	while(*line != '\0') {
-		WriteTX(*line);
-		line++;
-	}
-	//WriteTX('\n');
+void PortH_Output(uint8_t value) {
+	uint8_t temp;
+	temp = GPIO_PORTH_AHB_DATA_R & 0xF0; // ZERA 4 ULTIMOS BITS
+	temp = temp | value;
+	GPIO_PORTH_AHB_DATA_R = temp;
 }

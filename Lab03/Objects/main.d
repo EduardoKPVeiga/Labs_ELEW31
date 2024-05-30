@@ -1,1 +1,3 @@
-./objects/main.o: main.c C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdint.h
+./objects/main.o: main.c motor.h \
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdint.h tm4c1294ncpdt.h \
+  communication.h
