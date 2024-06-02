@@ -16,13 +16,13 @@
 #include "tm4c1294ncpdt.h"
 /*------------------------------------------------------------------------------------------------------*/
 #define NUMBER_OF_MOTOR_STATES							8
-#define COUNTERCLOCKWISE 										0
-#define CLOCKWISE														1
+#define CLOCKWISE 													0
+#define COUNTERCLOCKWISE										1
 #define HALFSTEPMODE												0
 #define FULLSTEPMODE												1
 #define ANGLE_PER_STATE_FULLLSTEP						360.0/2048
-#define ANGLE_PER_STATE_HALFSTEP						ANGLE_PER_STATE_FULLLSTEP / 2.0
-#define STATE_TRANSITION_DELAY							10							//	delay de 10ms
+#define ANGLE_PER_STATE_HALFSTEP						360.0/4096
+#define STATE_TRANSITION_DELAY							7							//	delay de 10ms
 /*------------------------------------------------------------------------------------------------------*/
 typedef enum stepState {
 	step_state_0,

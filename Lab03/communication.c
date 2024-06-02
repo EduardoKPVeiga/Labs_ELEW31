@@ -2,7 +2,7 @@
 // Arquivo de implementação do header communication.h
 // Este arquivo em C tem as funçoes para comunicação com placa EK-TM4C1294XL utilizando a interface Uart.
 // Autores: Fernando Abreu e Eduardo Veiga
-// Data: 30/05/2024
+// Data: 31/05/2024
 // Versão: 1.0
 
 #include "communication.h"
@@ -53,7 +53,14 @@ void Uart_init(void) {
 	GPIO_PORTA_AHB_DEN_R = 0x03;   	//Bit0 = entrada e bit1 = saida
 }
 
-uint8_t ReadRX(void)
+uint8_t ReadRX(void) {
+	if( (UART0_FR_R & 0x10) == 0x10) {
+		return 0x00;
+	}
+	return (uint8_t)UART0_DR_R;
+}
+
+uint8_t ReadRXLoop(void)
 {
 	// bit 4 => RXFE indica que não é possivel a leitura
 	while ((UART0_FR_R & 0x10) == 0x10){}	// 0001 0000 => verifica se é possivel a leitura
@@ -62,15 +69,17 @@ uint8_t ReadRX(void)
 	return value;
 }
 
-uint8_t ReadWord(char** word) {
+uint8_t ReadWord(char word[][50]) {
 	uint8_t size = 0;
-	char ch = (char)ReadRX();
-	char aux[50];
-	while (ch != '\0' && ch != '\n' && ch != 0x0A) {
+	char ch = (char)ReadRXLoop();
+	while (ch != '/' && ch != '*') {
 		(*word)[size++] = ch;
-		ch = (char)ReadRX();
+		ch = (char)ReadRXLoop();
 	}
 	(*word)[size++] = '\0';
+	if(ch == '*') {
+		return 0;
+	}
 	return size;
 }
 
@@ -83,7 +92,7 @@ void WriteTX(char value)
 	UART0_DR_R = (char)value;
 }
 
-void WriteTXNumber(char value) {
+void WriteTXCodigo(char value) {
 	WriteTX(' ');
 	WriteTX('(');
 	WriteTX('0');
@@ -217,4 +226,119 @@ void Write_line_putty(char* line) {
 		line++;
 	}
 	//WriteTX('\n');
+}
+void move_cursor_line_position(uint8_t jumps) {
+	move_cursor_beginning_putty();
+	while(jumps--) {
+		WriteTX('\n');
+	}
+}
+char convertNumberCharacter(uint8_t value) {
+	char ch;
+	switch(value) {
+		case 0:
+			ch = '0';
+			break;
+		case 1:
+			ch = '1';
+			break;
+		case 2:
+			ch = '2';
+			break;
+		case 3:
+			ch = '3';
+			break;
+		case 4:
+			ch = '4';
+			break;
+		case 5:
+			ch = '5';
+			break;
+		case 6:
+			ch = '6';
+			break;
+		case 7:
+			ch = '7';
+			break;
+		case 8:
+			ch = '8';
+			break;
+		case 9:
+			ch = '9';
+			break;
+		default:
+			ch = '*';
+			break;
+	}
+	return ch;
+}
+
+uint8_t convertCharacterNumber(char string[]) {
+	uint8_t i=0,value=0;
+	while(string[i] != '\0') {
+		value = value * 10;
+		value += string[i] - '0';
+		i++;
+	}
+	return value;
+}
+
+void WriteTXNumber8(uint8_t number) {
+	uint8_t div = 100;
+	uint8_t current_digit = number/div;
+	while(current_digit == 0 && div > 1) {
+		div = div/10;
+		current_digit=number/div;
+	}
+	WriteTX(convertNumberCharacter(current_digit));
+	number = number - current_digit*div;
+	while(div > 1) {
+		div = div / 10;
+		current_digit=number/div;
+		WriteTX(convertNumberCharacter(current_digit));
+		number = number - current_digit*div;
+	}
+}
+
+void WriteTXDouble(double value, uint8_t precision) {
+	uint16_t div = 100;
+	uint8_t current_digit=value/div,i;
+	char ch;
+	while(current_digit == 0 && div > 1) {
+		div = div/10;
+		current_digit=value/div;
+	}
+	ch = convertNumberCharacter(current_digit);
+	if(ch == '*') {
+		return;
+	}
+	WriteTX(ch);
+	value = value - current_digit*div;
+	while(div > 1) {
+		div = div / 10;
+		current_digit=value/div;
+		ch = convertNumberCharacter(current_digit);
+		if(ch == '*') {
+			return;
+		}
+		WriteTX(ch);
+		value = value - current_digit*div;
+	}
+	WriteTX('.');
+	i=0;
+	while(precision != i) {
+		value = value*10;
+		current_digit=(uint8_t)value;
+		ch = convertNumberCharacter(current_digit);
+		if(ch == '*') {
+			return;
+		}
+		WriteTX(ch);
+		value = value - current_digit;
+		i++;
+	}
+}
+void WriteTXAngle(double angle) {
+	WriteTXDouble(angle, 2);
+	WriteWord(" graus");
 }

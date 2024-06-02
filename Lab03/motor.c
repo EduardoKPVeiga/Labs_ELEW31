@@ -10,7 +10,7 @@
 void maintenanceMotorSetupChange(stepState* state, uint8_t direction, uint8_t step_speed) {
 	if(step_speed == FULLSTEPMODE) {
 		if(*state % 2) {
-			if(direction == CLOCKWISE) {
+			if(direction == COUNTERCLOCKWISE) {
 				*state = (*state + 1) % NUMBER_OF_MOTOR_STATES;
 			} else {
 				*state = (*state + NUMBER_OF_MOTOR_STATES - 1) % NUMBER_OF_MOTOR_STATES;
@@ -21,7 +21,7 @@ void maintenanceMotorSetupChange(stepState* state, uint8_t direction, uint8_t st
 
 void motorStateTransition(stepState* state, uint8_t direction, uint8_t step_speed) {
 	uint8_t step_change = step_speed + 1;
-	if(direction == CLOCKWISE) {
+	if(direction == COUNTERCLOCKWISE) {
 		*state = (*state + step_change) % NUMBER_OF_MOTOR_STATES;
 	} else {
 		*state = (*state + NUMBER_OF_MOTOR_STATES - step_change) % NUMBER_OF_MOTOR_STATES;
