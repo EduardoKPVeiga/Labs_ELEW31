@@ -153,3 +153,12 @@ void print_Info_Motor(uint8_t revolutions, double angle) {
 			WriteTXNumber8(revolutions);
 			//move_cursor_line_position(++jumps);
 }
+
+void acender_ledsN(uint8_t vn) {
+	PortN_Output(vn);
+}
+void acender_ledsN(uint8_t vn) {
+	PortN_Output(vn);
+}void acender_ledsN(uint8_t vn) {
+	PortN_Output(vn);
+}

@@ -26,6 +26,9 @@ void Write_line_putty(char* line);
 void MotorUnipolarPasso(uint32_t num_passos);
 void MotorUnipolarPasso1Volta(void);
 void MotorUnipolarMeioPasso(uint32_t num_passos);
+void Pisca_leds(void);
+void Timer0A_Handler(void);
+
 // -------------------------------------------------------------------------------
 // Função GPIO_Init
 // Inicializa os ports J e N
@@ -33,6 +36,46 @@ void MotorUnipolarMeioPasso(uint32_t num_passos);
 // Parâmetro de saída: Não tem
 void GPIO_Init(void)
 {
+	// Contar ate 8.000.000
+	// 16 bits, prescale de 8 bits
+	// GPTMTAILR = 7.999.999
+	
+	// Timer 0
+	SYSCTL_RCGCTIMER_R = 0x1;
+	
+	// Espera o timer estar pronto
+	while ((SYSCTL_PRTIMER_R & 0x01) != 0x01);
+	
+	// 0xFF.FF.FE.FE, desabilita o timer A
+	TIMER0_CTL_R &= 0xFFFFFFFE;
+	
+	// Timer no modo 32 bits
+	TIMER0_CFG_R = 0x0;
+	
+	// Modo periódico
+	TIMER0_TAMR_R = 0x2;
+	
+	// Timeout de 7.999.999 clocks
+	TIMER0_TAILR_R = 0x7A11FF;
+	
+	// Usado apenas para o prescale
+	TIMER0_TAPR_R = 0x00;
+	
+	// Configuração da interrupção
+	TIMER0_ICR_R = 0x1;
+	
+	// Interrupção no timeout
+	TIMER0_IMR_R = 0x00000001;
+	
+	// Prioridade da interrupção
+	NVIC_PRI4_R = (uint32_t)4 << (uint32_t)29;
+	
+	// Habilita a interrupção do timer
+	NVIC_EN0_R = (uint32_t)1 << (uint32_t)19;
+	
+	// Habilita o timer A
+	TIMER0_CTL_R |= 0x01;
+	
 	//1a. Ativar o clock para a porta setando o bit correspondente no registrador RCGCGPIO
 	SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTH);
 	//1b.   após isso verificar no PRGPIO se a porta está pronta para uso.
@@ -150,4 +193,55 @@ void PortH_Output(uint8_t value) {
 	temp = GPIO_PORTH_AHB_DATA_R & 0xF0; // ZERA 4 ULTIMOS BITS
 	temp = temp | value;
 	GPIO_PORTH_AHB_DATA_R = temp;
+void Timer0A_Handler()
+{
+	// Limpar o flag de interrupção
+	TIMER0_ICR_R = 0x01;
+	Pisca_leds();
+}
+
+uint8_t ReadRX(void)
+{
+	// bit 4 => RXFE indica que não é possivel a leitura
+	while ((UART0_FR_R & 0x10) == 0x10){}	// 0001 0000 => verifica se é possivel a leitura
+		//SysTick_Wait1ms(1);
+	uint8_t value = (uint8_t)UART0_DR_R;
+	return value;
+}
+
+// inicia a transmissão de dados
+void WriteTX(char value)
+{
+	// bit 5 => TXFF indica que não é possivel a escrita
+	while ((UART0_FR_R & 0x20) == 0x20){} // 0010 0000 => verifica se é possivel a escrita
+		//SysTick_Wait1ms(1);
+	UART0_DR_R = (char)value;
+}
+
+void clean_putty(void) {
+	WriteTX(0x1B);
+	WriteTX('[');
+	WriteTX('2');
+	WriteTX('J');
+}
+
+void move_cursor_beginning_putty(void) {
+	WriteTX(0x1B);
+	WriteTX('[');
+	WriteTX(';');
+	WriteTX('H');
+}
+
+void Write_line_putty(char* line) {
+	while(*line != '\0') {
+		WriteTX(*line);
+		line++;
+	}
+	//WriteTX('\n');
+}
+
+void Pisca_leds()
+{
+	PortN_Output(GPIO_PORTN_DATA_R ^ 0x03);
+	//WriteTX('A');
 }
