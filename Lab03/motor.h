@@ -24,6 +24,7 @@
 #define ANGLE_PER_STATE_HALFSTEP						360.0/4096
 #define STATE_TRANSITION_DELAY							7							//	delay de 10ms
 /*------------------------------------------------------------------------------------------------------*/
+
 typedef enum stepState {
 	step_state_0,
 	step_state_0_1,					

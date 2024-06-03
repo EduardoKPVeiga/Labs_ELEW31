@@ -14,20 +14,20 @@
 #define GPIO_PORTH	(0x0080) //bit 7 0000 0000 1000 0000
 #define GPIO_PORTN  (0x1000) //bit 12
 
+#define CLOCKWISE 													0
+#define COUNTERCLOCKWISE										1
+
 void SysTick_Wait1ms(uint32_t delay);
 void GPIO_Init(void);
 uint32_t PortJ_Input(void);
 void PortN_Output(uint32_t valor);
-void WriteTX(char value);
-uint8_t ReadRX(void);
-void clean_putty(void);
-void move_cursor_beginning_putty(void);
-void Write_line_putty(char* line);
 void MotorUnipolarPasso(uint32_t num_passos);
 void MotorUnipolarPasso1Volta(void);
 void MotorUnipolarMeioPasso(uint32_t num_passos);
-void Pisca_leds(void);
 void Timer0A_Handler(void);
+
+extern uint8_t directionMotor;			//	Sentido de rotação do motor.
+extern uint8_t led_status;					//	Estado dos leds da interrupcao
 
 // -------------------------------------------------------------------------------
 // Função GPIO_Init
@@ -177,71 +177,125 @@ uint32_t PortJ_Input(void)
 // Escreve os valores no port N
 // Parâmetro de entrada: Valor a ser escrito
 // Parâmetro de saída: não tem
-void PortN_Output(uint32_t valor)
+void PortA_Output(uint32_t valor)
 {
     uint32_t temp;
-    //vamos zerar somente os bits menos significativos
-    //para uma escrita amigável nos bits 0 e 1
-    temp = GPIO_PORTN_DATA_R & 0xFC; // 1111 1100
-    //agora vamos fazer o OR com o valor recebido na função
+    temp = GPIO_PORTA_AHB_DATA_R & 0xF0; // ZERA 4 ULTIMOS BITS
     temp = temp | valor;
-    GPIO_PORTN_DATA_R = temp; 
+    GPIO_PORTA_AHB_DATA_R = temp; 
+}
+
+void PortQ_Output(uint32_t valor)
+{
+    uint32_t temp;
+    temp = GPIO_PORTQ_DATA_R & 0x0F; // ZERA 4 PRIMEIROS BITS
+    temp = temp | valor;
+    GPIO_PORTQ_DATA_R = temp; 
 }
 
 void PortH_Output(uint8_t value) {
 	uint8_t temp;
 	temp = GPIO_PORTH_AHB_DATA_R & 0xF0; // ZERA 4 ULTIMOS BITS
 	temp = temp | value;
-	GPIO_PORTH_AHB_DATA_R = temp;
+	GPIO_PORTH_AHB_DATA_R = temp;	
+}
+
 void Timer0A_Handler()
 {
 	// Limpar o flag de interrupção
 	TIMER0_ICR_R = 0x01;
-	Pisca_leds();
-}
-
-uint8_t ReadRX(void)
-{
-	// bit 4 => RXFE indica que não é possivel a leitura
-	while ((UART0_FR_R & 0x10) == 0x10){}	// 0001 0000 => verifica se é possivel a leitura
-		//SysTick_Wait1ms(1);
-	uint8_t value = (uint8_t)UART0_DR_R;
-	return value;
-}
-
-// inicia a transmissão de dados
-void WriteTX(char value)
-{
-	// bit 5 => TXFF indica que não é possivel a escrita
-	while ((UART0_FR_R & 0x20) == 0x20){} // 0010 0000 => verifica se é possivel a escrita
-		//SysTick_Wait1ms(1);
-	UART0_DR_R = (char)value;
-}
-
-void clean_putty(void) {
-	WriteTX(0x1B);
-	WriteTX('[');
-	WriteTX('2');
-	WriteTX('J');
-}
-
-void move_cursor_beginning_putty(void) {
-	WriteTX(0x1B);
-	WriteTX('[');
-	WriteTX(';');
-	WriteTX('H');
-}
-
-void Write_line_putty(char* line) {
-	while(*line != '\0') {
-		WriteTX(*line);
-		line++;
+	
+	switch (led_status)
+	{
+		case 0:
+			if (directionMotor == CLOCKWISE)
+			{
+				PortA_Output(GPIO_PORTA_AHB_DATA_R ^ 0x80);				// PA7
+				PortQ_Output(0x00);
+			}
+			else
+			{
+				PortA_Output(0x00);
+				PortQ_Output(GPIO_PORTQ_DATA_R ^ 0x01);						// PQ0
+			}
+			break;
+		case 1:
+			if (directionMotor == CLOCKWISE)
+			{
+				PortA_Output(GPIO_PORTA_AHB_DATA_R ^ 0xC0);				// PA7, PA6
+				PortQ_Output(0x00);
+			}
+			else
+			{
+				PortA_Output(0x00);
+				PortQ_Output(GPIO_PORTQ_DATA_R ^ 0x03);						// PQ0, PQ1
+			}
+			break;
+		case 2:
+			if (directionMotor == CLOCKWISE)
+			{
+				PortA_Output(GPIO_PORTA_AHB_DATA_R ^ 0xE0);				// PA7, PA6, PA5
+				PortQ_Output(0x00);
+			}
+			else
+			{
+				PortA_Output(0x00);
+				PortQ_Output(GPIO_PORTQ_DATA_R ^ 0x07);						// PQ0, PQ1, PQ2
+			}
+			break;
+		case 3:
+			if (directionMotor == CLOCKWISE)
+			{
+				PortA_Output(GPIO_PORTA_AHB_DATA_R ^ 0xF0);				// PA7, PA6, PA5, PA4
+				PortQ_Output(0x00);
+			}
+			else
+			{
+				PortA_Output(0x00);
+				PortQ_Output(GPIO_PORTQ_DATA_R ^ 0x0F);						// PQ0, PQ1, PQ2, PQ3
+			}
+			break;
+		case 4:
+			if (directionMotor == CLOCKWISE)
+			{
+				PortA_Output(GPIO_PORTA_AHB_DATA_R ^ 0xF0);				// PA7, PA6, PA5, PA4
+				PortQ_Output(GPIO_PORTQ_DATA_R ^ 0x08);						// PQ3
+			}
+			else
+			{
+				PortA_Output(GPIO_PORTA_AHB_DATA_R ^ 0x10);				// PA4
+				PortQ_Output(GPIO_PORTQ_DATA_R ^ 0x0F);						// PQ0, PQ1, PQ2, PQ3
+			}
+			break;
+		case 5:
+			if (directionMotor == CLOCKWISE)
+			{
+				PortA_Output(GPIO_PORTA_AHB_DATA_R ^ 0xF0);				// PA7, PA6, PA5, PA4
+				PortQ_Output(GPIO_PORTQ_DATA_R ^ 0x0C);						// PQ3, PQ2
+			}
+			else
+			{
+				PortA_Output(GPIO_PORTA_AHB_DATA_R ^ 0x30);				// PA4, PA5
+				PortQ_Output(GPIO_PORTQ_DATA_R ^ 0x0F);						// PQ0, PQ1, PQ2, PQ3
+			}
+			break;
+		case 6:
+			if (directionMotor == CLOCKWISE)
+			{
+				PortA_Output(GPIO_PORTA_AHB_DATA_R ^ 0xF0);				// PA7, PA6, PA5, PA4
+				PortQ_Output(GPIO_PORTQ_DATA_R ^ 0x0E);						// PQ3, PQ2, PQ1
+			}
+			else
+			{
+				PortA_Output(GPIO_PORTA_AHB_DATA_R ^ 0x70);				// PA4, PA5, PA6
+				PortQ_Output(GPIO_PORTQ_DATA_R ^ 0x0F);						// PQ0, PQ1, PQ2, PQ3
+			}
+			break;
+		case 7:
+			PortA_Output(GPIO_PORTA_AHB_DATA_R ^ 0xF0);					// PA7, PA6, PA5, PA4
+			PortQ_Output(GPIO_PORTQ_DATA_R ^ 0x0F);							// PQ3, PQ2, PQ1, PQ0
+			break;
+		default:
+			break;
 	}
-	//WriteTX('\n');
-}
-
-void Pisca_leds()
-{
-	PortN_Output(GPIO_PORTN_DATA_R ^ 0x03);
-	//WriteTX('A');
 }

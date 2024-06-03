@@ -21,16 +21,20 @@ void GPIO_Init(void);
 uint32_t PortJ_Input(void);
 void PortN_Output(uint32_t leds);
 void print_Info_Motor(uint8_t revolutions, double angle);
+void increase_led_status(void);
+
+uint8_t directionMotor = CLOCKWISE;									//	Sentido de rotação do motor.
+double angle = 0.00;																//	Ângulo do motor de passos.
+double old_angle = 0.00;														//	Ângulo do motor de passos.
+uint8_t led_status = 0;															//	Estado dos leds da interrupcao
 
 int main(void)
 {
 	// variáveis de controle
 	uint8_t jumps;																			// 	pular linhas
-	uint8_t directionMotor = CLOCKWISE;									//	Sentido de rotação do motor.
 	uint8_t	velocity = FULLSTEPMODE;										// 	Motor é meio passo ou passo completo.
 	stepState	state = step_state_0;											// 	Máquina de estado para controlar o passo do motor de passo.
 	uint8_t statusMotor = OFF;													// 	Motor esta ligado ou desligado
-	double angle = 0.00;																//	Ângulo do motor de passos.
 	double test = 365.35;
 	uint8_t	revolutions;																// 	n.° de voltas do motor.
 	char word[50], ch;
@@ -131,6 +135,13 @@ int main(void)
 				print_Info_Motor(revolutions, angle);
 			}
 		}
+		
+		if (angle - old_angle >= 45)
+		{
+			old_angle = angle;
+			increase_led_status();
+		}
+		
 		print_Info_Motor(revolutions, angle);
 		move_cursor_line_position(++jumps);
 		WriteWord("FIM");
@@ -154,11 +165,9 @@ void print_Info_Motor(uint8_t revolutions, double angle) {
 			//move_cursor_line_position(++jumps);
 }
 
-void acender_ledsN(uint8_t vn) {
-	PortN_Output(vn);
-}
-void acender_ledsN(uint8_t vn) {
-	PortN_Output(vn);
-}void acender_ledsN(uint8_t vn) {
-	PortN_Output(vn);
+void increase_led_status()
+{
+	led_status++;
+	if (led_status >= 8)
+		led_status = 0;
 }
