@@ -42,15 +42,6 @@ void Uart_init(void) {
 	// esperar até que a respectiva GPIO esteja pronta para ser acessada no registrador PRGPIO (cada
 	// bit representa uma GPIO).
 	// feito no GPIO_Init
-	// Passo 8: Desabilitar a funcionalidade analógica no registrador GPIOAMSEL.
-	GPIO_PORTA_AHB_AMSEL_R 	= 0x00;
-	// Passo 9: Escolher a função alternativa dos pinos respectivos TX e RX no registrador GPIOPCTL
-	GPIO_PORTA_AHB_PCTL_R 	= 0x11;
-	// Passp 10: Habilitar os bits de função alternativa no registrador GPIOAFSEL nos pinos 
-	// respectivos à UART.
-	GPIO_PORTA_AHB_AFSEL_R = 0x03;		// 0000 0011 habilita os pinos A1 e A0 para função alternativas
-	// Passo 11: 11.Configurar os pinos como digitais no registrador GPIODEN.
-	GPIO_PORTA_AHB_DEN_R = 0x03;   	//Bit0 = entrada e bit1 = saida
 }
 
 uint8_t ReadRX(void) {

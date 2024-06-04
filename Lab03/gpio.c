@@ -11,8 +11,10 @@
  // EDCBA9876543210
 #define GPIO_PORTA  (0x0001) //bit 0
 #define GPIO_PORTJ  (0x0100) //bit 8
+#define GPIO_PORTQ	(0x4000) //bit 14
 #define GPIO_PORTH	(0x0080) //bit 7 0000 0000 1000 0000
 #define GPIO_PORTN  (0x1000) //bit 12
+#define GPIO_PORTP	(0x2000) //bit 13
 
 #define CLOCKWISE 													0
 #define COUNTERCLOCKWISE										1
@@ -29,6 +31,7 @@ void GPIOPortJ_Handler(void);
 
 extern uint8_t directionMotor;			//	Sentido de rotação do motor.
 extern uint8_t led_status;					//	Estado dos leds da interrupcao
+extern uint8_t statusMotor;
 
 // -------------------------------------------------------------------------------
 // Função GPIO_Init
@@ -37,10 +40,6 @@ extern uint8_t led_status;					//	Estado dos leds da interrupcao
 // Parâmetro de saída: Não tem
 void GPIO_Init(void)
 {
-	// Contar ate 8.000.000
-	// 16 bits, prescale de 8 bits
-	// GPTMTAILR = 7.999.999
-	
 	// Timer 0
 	SYSCTL_RCGCTIMER_R = 0x1;
 	
@@ -69,48 +68,61 @@ void GPIO_Init(void)
 	TIMER0_IMR_R = 0x00000001;
 	
 	// Prioridade da interrupção
-	NVIC_PRI4_R = (uint32_t)4 << (uint32_t)29;
+	NVIC_PRI4_R = NVIC_PRI4_R | ((uint32_t)4 << (uint32_t)29);
 	
 	// Habilita a interrupção do timer
-	NVIC_EN0_R = (uint32_t)1 << (uint32_t)19;
-	
+	NVIC_EN0_R = NVIC_EN0_R | ((uint32_t)1 << (uint32_t)19);
+
 	// Habilita o timer A
 	TIMER0_CTL_R |= 0x01;
-	
+
 	//1a. Ativar o clock para a porta setando o bit correspondente no registrador RCGCGPIO
-	SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTH);
+	SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTQ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTH | GPIO_PORTP);
 	//1b.   após isso verificar no PRGPIO se a porta está pronta para uso.
-  while((SYSCTL_PRGPIO_R & (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTH) ) != (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTH) ){}
+  while((SYSCTL_PRGPIO_R & (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTH | GPIO_PORTQ | GPIO_PORTP) ) != (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTH | GPIO_PORTQ | GPIO_PORTP) ){}
 	
 	// 2. Limpar o AMSEL para desabilitar a analógica
 	GPIO_PORTA_AHB_AMSEL_R = 0x00;
 	GPIO_PORTJ_AHB_AMSEL_R = 0x00;
 	GPIO_PORTH_AHB_AMSEL_R = 0x00;
 	GPIO_PORTN_AMSEL_R = 0x00;
+	GPIO_PORTQ_AMSEL_R = 0x00;
+	GPIO_PORTP_AMSEL_R = 0x00;
 		
 	// 3. Limpar PCTL para selecionar o GPIO
 	GPIO_PORTA_AHB_PCTL_R = 0x11;
 	GPIO_PORTJ_AHB_PCTL_R = 0x00;
 	GPIO_PORTH_AHB_PCTL_R = 0x00;
 	GPIO_PORTN_PCTL_R = 0x00;
+	GPIO_PORTQ_PCTL_R = 0x00;
+	GPIO_PORTP_PCTL_R = 0x00;
 
 	// 4. DIR para 0 se for entrada, 1 se for saída
-	GPIO_PORTA_AHB_DIR_R = 0x00;
+	GPIO_PORTA_AHB_DIR_R = 0xF0;
 	GPIO_PORTJ_AHB_DIR_R = 0x00;
 	GPIO_PORTH_AHB_DIR_R = 0x0F;	// H3 ~ H0
 	GPIO_PORTN_DIR_R = 0x03; //BIT0 | BIT1
+	GPIO_PORTQ_DIR_R = 0x0F;
+	GPIO_PORTP_DIR_R = 0x20; // PP5
 		
 	// 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem função alternativa	
 	GPIO_PORTA_AHB_AFSEL_R = 0x03;
 	GPIO_PORTJ_AHB_AFSEL_R = 0x00;
 	GPIO_PORTH_AHB_AFSEL_R = 0x00;
 	GPIO_PORTN_AFSEL_R = 0x00;
+	GPIO_PORTQ_AFSEL_R = 0x00;
+	GPIO_PORTP_AFSEL_R = 0x00;
 		
 	// 6. Setar os bits de DEN para habilitar I/O digital	
-	GPIO_PORTA_AHB_DEN_R = 0x03;   	//Bit0 = entrada e bit1 = saida
+	GPIO_PORTA_AHB_DEN_R = 0xF3;   	//Bit0 = entrada e bit1 = saida
 	GPIO_PORTJ_AHB_DEN_R = 0x03;		//Bit0 e bit1
 	GPIO_PORTH_AHB_DEN_R = 0x0F;		// PH3 ~ PH0
 	GPIO_PORTN_DEN_R = 0x03; 		   	//Bit0 e bit1
+	GPIO_PORTQ_DEN_R = 0x0F;
+	GPIO_PORTP_DEN_R = 0x20;
+	
+	// Habilita leds de controle
+	GPIO_PORTP_DATA_R = 0x20;
 	
 	// 7. Habilitar resistor de pull-up interno, setar PUR para 1
 	GPIO_PORTJ_AHB_PUR_R = 0x03;   	//Bit0 e bit1
@@ -178,13 +190,12 @@ void GPIO_Init(void)
 	GPIO_PORTJ_AHB_ICR_R = 0x03;
 	
 	// Ativa a interrupção em ambos os pinos
-	GPIO_PORTJ_AHB_IM_R = 0x03
+	GPIO_PORTJ_AHB_IM_R = 0x03;
 	
 	// Ativa a fonte de interrupção no NVIC
 	NVIC_EN1_R = (NVIC_EN1_R | (0x01 << 19));
 	
-	NVIC_PRI12_R = 0x05 << 27;
-	
+	NVIC_PRI12_R = (NVIC_PRI12_R | 0x05 << 27);
 	
 	
 }
@@ -200,14 +211,11 @@ uint32_t PortJ_Input(void)
 }
 
 // -------------------------------------------------------------------------------
-// Função PortN_Output
-// Escreve os valores no port N
-// Parâmetro de entrada: Valor a ser escrito
-// Parâmetro de saída: não tem
+// Função PortA_Output
 void PortA_Output(uint32_t valor)
 {
     uint32_t temp;
-    temp = GPIO_PORTA_AHB_DATA_R & 0xF0; // ZERA 4 ULTIMOS BITS
+    temp = GPIO_PORTA_AHB_DATA_R & 0x0F; // ZERA 4 ULTIMOS BITS
     temp = temp | valor;
     GPIO_PORTA_AHB_DATA_R = temp; 
 }
@@ -215,7 +223,7 @@ void PortA_Output(uint32_t valor)
 void PortQ_Output(uint32_t valor)
 {
     uint32_t temp;
-    temp = GPIO_PORTQ_DATA_R & 0x0F; // ZERA 4 PRIMEIROS BITS
+    temp = GPIO_PORTQ_DATA_R & 0xF0; // ZERA 4 PRIMEIROS BITS
     temp = temp | valor;
     GPIO_PORTQ_DATA_R = temp; 
 }
@@ -330,9 +338,14 @@ void Timer0A_Handler()
 
 void GPIOPortJ_Handler()
 {
+	GPIO_PORTJ_AHB_ICR_R = 0x03;
 	if ((GPIO_PORTJ_AHB_RIS_R & 0x01) == 0x01)
 	{
-		// J0 pressionado
+		statusMotor = 0;
+		led_status = 0;
+		PortA_Output(0x00);
+		PortQ_Output(0x00);
+		GPIO_PORTP_DATA_R = 0x00;
 	}
 	else if ((GPIO_PORTJ_AHB_RIS_R & 0x02) == 0x02)
 	{

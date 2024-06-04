@@ -22,11 +22,14 @@ uint32_t PortJ_Input(void);
 void PortN_Output(uint32_t leds);
 void print_Info_Motor(uint8_t revolutions, double angle);
 void increase_led_status(void);
+void PortA_Output(uint32_t valor);
+void PortQ_Output(uint32_t valor);
 
 uint8_t directionMotor = CLOCKWISE;									//	Sentido de rotação do motor.
 double angle = 0.00;																//	Ângulo do motor de passos.
 double old_angle = 0.00;														//	Ângulo do motor de passos.
 uint8_t led_status = 0;															//	Estado dos leds da interrupcao
+uint8_t statusMotor = OFF;													// 	Motor esta ligado ou desligado
 
 int main(void)
 {
@@ -34,7 +37,6 @@ int main(void)
 	uint8_t jumps;																			// 	pular linhas
 	uint8_t	velocity = FULLSTEPMODE;										// 	Motor é meio passo ou passo completo.
 	stepState	state = step_state_0;											// 	Máquina de estado para controlar o passo do motor de passo.
-	uint8_t statusMotor = OFF;													// 	Motor esta ligado ou desligado
 	double test = 365.35;
 	uint8_t	revolutions;																// 	n.° de voltas do motor.
 	char word[50], ch;
@@ -107,6 +109,12 @@ int main(void)
 		statusMotor = ON;
 		angle = 0.00;
 		double aux = 0.00;
+		
+		// Habilita os leds de controle
+		GPIO_PORTP_DATA_R = 0x20;
+		led_status = 0;
+		old_angle = 0;
+
 		while(statusMotor && revolutions) {													// SW1 teclando 
 			motorStateTransition(&state, directionMotor, velocity);		//	muda para próximo estágio(passo) o motor
 			setStepMotorVoltage(state);																// Coloca a Voltage pelo passo(estágio) atual
@@ -126,6 +134,12 @@ int main(void)
 			}
 			if(angle > 360.00) {
 				angle = angle - 360.00;
+				
+				old_angle = 0;
+				led_status = 0;
+				PortA_Output(0x00);
+				PortQ_Output(0x00);
+				
 				revolutions--;
 			}
 			
@@ -133,15 +147,18 @@ int main(void)
 			if(aux > UPDATE_ANGLE) {
 				aux = 0.00;
 				print_Info_Motor(revolutions, angle);
+				move_cursor_line_position(jumps);
+				WriteWord("led_status: ");
+				WriteTXNumber8(led_status);
 			}
-		}
-		
-		if (angle - old_angle >= 45)
-		{
-			old_angle = angle;
-			increase_led_status();
-		}
-		
+			
+			if (angle - old_angle >= 45)
+			{
+				old_angle = angle;
+				increase_led_status();
+			}
+		}		
+		GPIO_PORTP_DATA_R = 0x00;
 		print_Info_Motor(revolutions, angle);
 		move_cursor_line_position(++jumps);
 		WriteWord("FIM");
@@ -169,5 +186,10 @@ void increase_led_status()
 {
 	led_status++;
 	if (led_status >= 8)
+	{
 		led_status = 0;
+		
+		PortA_Output(0x00);
+		PortQ_Output(0x00);
+	}
 }
