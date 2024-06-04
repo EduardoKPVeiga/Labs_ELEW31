@@ -26,16 +26,17 @@ Project File Date:  06/03/2024
 
 <h2>Output:</h2>
 *** Using Compiler 'V6.16', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
-Rebuild target 'Target 1'
-assembling startup.s...
-assembling utils.s...
+Build target 'Target 1'
+gpio.c(183): error: called object type 'int' is not a function or function pointer
+        NVIC_EN1_R = NVIC_EN1_R | (0x01 << 19);
+        ^
+./tm4c1294ncpdt.h(2789): note: expanded from macro 'NVIC_EN1_R'
+#define NVIC_EN1_R              (*((volatile uint32_t *)0xE000E104))
+                                ^
+1 error generated.
 compiling gpio.c...
-compiling motor.c...
 compiling main.c...
-compiling communication.c...
-linking...
-Program Size: Code=6930 RO-data=130 RW-data=0 ZI-data=1144  
-".\Objects\Lab03.axf" - 0 Error(s), 0 Warning(s).
+".\Objects\Lab03.axf" - 1 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -48,7 +49,8 @@ Package Vendor: Keil
   C:\Users\Eduardo\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:01
+Target not created.
+Build Time Elapsed:  00:00:00
 </pre>
 </body>
 </html>

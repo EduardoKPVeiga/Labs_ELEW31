@@ -25,6 +25,7 @@ void MotorUnipolarPasso(uint32_t num_passos);
 void MotorUnipolarPasso1Volta(void);
 void MotorUnipolarMeioPasso(uint32_t num_passos);
 void Timer0A_Handler(void);
+void GPIOPortJ_Handler(void);
 
 extern uint8_t directionMotor;			//	Sentido de rotação do motor.
 extern uint8_t led_status;					//	Estado dos leds da interrupcao
@@ -160,6 +161,32 @@ void GPIO_Init(void)
 	
 	GPIO_PORTA_AHB_PCTL_R = 0x11;			// 0001 0001 A1 e A0 recebe a função 1
 	GPIO_PORTA_AHB_AFSEL_R = 0x03;		// 0000 0011 habilita os pinos A1 e A0 para função alternativas
+	
+	// Desabilita as interrupções na porta J
+	GPIO_PORTJ_AHB_IM_R = 0x00;
+	
+	// Interrupção por borda
+	GPIO_PORTJ_AHB_IS_R = 0x00;
+	
+	// Borda única em ambos os pinos
+	GPIO_PORTJ_AHB_IBE_R = 0x00;
+	
+	// Borda de descida para J0 e de subida para J1
+	GPIO_PORTJ_AHB_IEV_R = 0x02;
+	
+	// Realiza o ACK no registrador para ambos os pinos
+	GPIO_PORTJ_AHB_ICR_R = 0x03;
+	
+	// Ativa a interrupção em ambos os pinos
+	GPIO_PORTJ_AHB_IM_R = 0x03
+	
+	// Ativa a fonte de interrupção no NVIC
+	NVIC_EN1_R = (NVIC_EN1_R | (0x01 << 19));
+	
+	NVIC_PRI12_R = 0x05 << 27;
+	
+	
+	
 }
 
 // -------------------------------------------------------------------------------
@@ -297,5 +324,18 @@ void Timer0A_Handler()
 			break;
 		default:
 			break;
+	}
+}
+
+
+void GPIOPortJ_Handler()
+{
+	if ((GPIO_PORTJ_AHB_RIS_R & 0x01) == 0x01)
+	{
+		// J0 pressionado
+	}
+	else if ((GPIO_PORTJ_AHB_RIS_R & 0x02) == 0x02)
+	{
+		// J1 pressionado
 	}
 }
