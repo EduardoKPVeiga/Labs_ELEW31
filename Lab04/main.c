@@ -17,12 +17,7 @@ uint32_t PortJ_Input(void);
 void PortN_Output(uint32_t leds);
 void PortA_Output(uint32_t valor);
 void PortQ_Output(uint32_t valor);
-
-// ==========
-uint8_t duty_cycle = 0;
-uint8_t motor_state = OFF;
-uint8_t motor_rot = CLOCKWISE;
-// ==========
+uint32_t adc_convertion(void);
 
 int main(void)
 {
@@ -33,6 +28,8 @@ int main(void)
 	
 	// loop principal
 	while(1) {
-		//
+		uint32_t adc_result = adc_convertion();
+		duty_cycle = (uint8_t)((adc_result * 100) / 4095);
+		SysTick_Wait1ms(100);
 	}
 }

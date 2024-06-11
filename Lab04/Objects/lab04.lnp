@@ -1,7 +1,6 @@
 --cpu=Cortex-M4.fp.sp
 ".\objects\gpio.o"
 ".\objects\main.o"
-".\objects\motor.o"
 ".\objects\startup.o"
 ".\objects\utils.o"
 ".\objects\decode.o"

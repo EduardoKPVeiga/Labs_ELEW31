@@ -1,13 +1,13 @@
 // motor.h
 // Desenvolvido para a placa EK-TM4C1294XL conectado com a placa auxiliar TIVA para controlar um motor
 // de passos.
-// Este arquivo Header tem as funçoes para controlar um Motor de Passos Unipolar seguindo as coneções
+// Este arquivo Header tem as funcoes para controlar um Motor de Passos Unipolar seguindo as conecoes
 // esquematizada na placa auxiliar TIVA.
-// Uma atualização a ser feita é fazer funções para motor de passos bipolar ou criar um header específico.
+// Uma atualizacao a ser feita e fazer funcoes para motor de passos bipolar ou criar um header especifico.
 // para isso.
 // Autores: Fernando Abreu e Eduardo Veiga
 // Data: 30/05/2024
-// Versão: 1.0
+// Versao: 1.0
 /*------------------------------------------------------------------------------------------------------*/
 #ifndef __INCLUDED_MOTOR_H__
 #define __INCLUDED_MOTOR_H__
@@ -20,9 +20,11 @@
 #define COUNTERCLOCKWISE										1
 #define OFF																	0
 #define ON																	1
-/*------------------------------------------------------------------------------------------------------*/
 
+// ======================================
+static uint8_t duty_cycle = 0;
+static uint8_t motor_state = OFF;
+static uint8_t motor_rot = CLOCKWISE;
+// ======================================
 
-/*------------------------------------------------------------------------------------------------------*/
 #endif // end of file MOTOR_H
-/*------------------------------------------------------------------------------------------------------*/

@@ -32,13 +32,17 @@ void PortH_Output(uint8_t value);
 void PortA_Output(uint32_t valor);
 void PortQ_Output(uint32_t valor);
 void PortE_Output(uint8_t value);
+uint32_t PortE_Input(void);
+uint32_t adc_convertion(void);
 
+/*
 extern uint8_t duty_cycle;
 extern uint8_t motor_state;
 extern uint8_t motor_rot;
+*/
 
 // -------------------------------------------------------------------------------
-// Função GPIO_Init
+// Funcao GPIO_Init
 // Inicializa os ports J e N
 // Parametro de entrada: Nao tem
 // Parametro de saida: Nao tem
@@ -58,8 +62,8 @@ void GPIO_Init(void)
 	GPIO_PORTN_AMSEL_R = 0x00;
 	GPIO_PORTQ_AMSEL_R = 0x00;
 	GPIO_PORTP_AMSEL_R = 0x00;
-	GPIO_PORTF_AHB_AMSEL_R = 0x0C;
-	GPIO_PORTE_AHB_AMSEL_R = 0x00;
+	GPIO_PORTF_AHB_AMSEL_R = 0x00;
+	GPIO_PORTE_AHB_AMSEL_R = 0x18; // PE4 anlog; PE0, PE1 digital
 		
 	// 3. Limpar PCTL para selecionar o GPIO
 	GPIO_PORTA_AHB_PCTL_R = 0x11;
@@ -71,7 +75,7 @@ void GPIO_Init(void)
 	GPIO_PORTF_AHB_PCTL_R = 0x00;
 	GPIO_PORTE_AHB_PCTL_R = 0x00;
 
-	// 4. DIR para 0 se for entrada, 1 se for saída
+	// 4. DIR para 0 se for entrada, 1 se for saida
 	GPIO_PORTA_AHB_DIR_R = 0xF0;
 	GPIO_PORTJ_AHB_DIR_R = 0x00;
 	GPIO_PORTH_AHB_DIR_R = 0x0F;	// H3 ~ H0
@@ -79,17 +83,17 @@ void GPIO_Init(void)
 	GPIO_PORTQ_DIR_R = 0x0F;
 	GPIO_PORTP_DIR_R = 0x20; // PP5
 	GPIO_PORTF_AHB_DIR_R = 0x0C; // PF2, PF3
-	GPIO_PORTE_AHB_DIR_R = 0x03; // PE0, PE1
+	GPIO_PORTE_AHB_DIR_R = 0x0B; // PE4 input; PE0, PE1, PE3 output
 		
-	// 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem função alternativa	
+	// 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem funcao alternativa	
 	GPIO_PORTA_AHB_AFSEL_R = 0x03;
 	GPIO_PORTJ_AHB_AFSEL_R = 0x00;
 	GPIO_PORTH_AHB_AFSEL_R = 0x00;
 	GPIO_PORTN_AFSEL_R = 0x00;
 	GPIO_PORTQ_AFSEL_R = 0x00;
 	GPIO_PORTP_AFSEL_R = 0x00;
-	GPIO_PORTF_AHB_AFSEL_R = 0x0C;
-	GPIO_PORTE_AHB_AFSEL_R = 0x00;
+	GPIO_PORTF_AHB_AFSEL_R = 0x00;
+	GPIO_PORTE_AHB_AFSEL_R = 0x18;
 		
 	// 6. Setar os bits de DEN para habilitar I/O digital	
 	GPIO_PORTA_AHB_DEN_R = 0xF3;   	//Bit0 = entrada e bit1 = saida
@@ -98,14 +102,16 @@ void GPIO_Init(void)
 	GPIO_PORTN_DEN_R = 0x03; 		   	//Bit0 e bit1
 	GPIO_PORTQ_DEN_R = 0x0F;
 	GPIO_PORTP_DEN_R = 0x20;
-	GPIO_PORTF_AHB_DEN_R = 0x00;
+	GPIO_PORTF_AHB_DEN_R = 0x0C;
 	GPIO_PORTE_AHB_DEN_R = 0x03;
+	
+	GPIO_PORTF_AHB_DATA_R = 0x04;
 	
 	// Habilita leds de controle
 	GPIO_PORTP_DATA_R = 0x20;
 	
 	// 7. Habilitar resistor de pull-up interno, setar PUR para 1
-	GPIO_PORTJ_AHB_PUR_R = 0x03;   	//Bit0 e bit1
+	GPIO_PORTJ_AHB_PUR_R = 0x03;   	//bit0 e bit1
 	
 	PortJ_interrupt_init();
 	
@@ -117,7 +123,7 @@ void GPIO_Init(void)
 // Configura o timer 0
 // Parametro de entrada: nao tem
 // Parametro de saida: nao tem
-void Timer0A_init()
+void Timer0A_init(void)
 {
 	// Timer 0
 	SYSCTL_RCGCTIMER_R = 0x1;
@@ -156,7 +162,7 @@ void Timer0A_init()
 	TIMER0_CTL_R |= 0x01;
 }
 
-void PortJ_interrupt_init()
+void PortJ_interrupt_init(void)
 {
 	// Desabilita as interrupcoes na porta J
 	GPIO_PORTJ_AHB_IM_R = 0x00;
@@ -182,7 +188,7 @@ void PortJ_interrupt_init()
 	NVIC_PRI12_R = (NVIC_PRI12_R | 0x05 << 27);
 }
 
-void ADC0_init()
+void ADC0_init(void)
 {
 // Analog Digital Converter ====================================================
 	// PF2 and PF3
@@ -206,17 +212,17 @@ void ADC0_init()
 	// SS0 priority (lowest)
 	ADC0_SSPRI_R |= 0x3;
 	
-	// ASEN3 = 0
+	// ASEN2 = 0
 	ADC0_ACTSS_R &= 0xF07; // 1111 0000 0111
 	
 	ADC0_EMUX_R = 0x00;
 	
-	ADC0_SSMUX3_R = 0x0;
+	ADC0_SSMUX3_R = 0x09;
 	
 	ADC0_SSCTL3_R = 0x6;
 	
-	// ASEN3 = 1
-	ADC0_ACTSS_R |= 0x1 << 3;
+	// ASEN2 = 1
+	ADC0_ACTSS_R |= 0x1 << 2;
 }
 
 // -------------------------------------------------------------------------------
@@ -227,6 +233,11 @@ void ADC0_init()
 uint32_t PortJ_Input(void)
 {
 	return GPIO_PORTJ_AHB_DATA_R;
+}
+
+uint32_t PortE_Input(void)
+{
+	return GPIO_PORTE_AHB_DATA_R;
 }
 
 // -------------------------------------------------------------------------------
@@ -263,7 +274,16 @@ void PortE_Output(uint8_t value)
 	GPIO_PORTE_AHB_DATA_R = temp;	
 }
 
-void Timer0A_Handler()
+uint32_t adc_convertion(void)
+{
+	ADC0_PSSI_R = ADC_PSSI_SS3;
+	while ((ADC0_RIS_R & (0x1 << 3)) != 0x1 << 3){}
+	uint32_t var = ADC0_SSFIFO3_R;
+	ADC0_ISC_R = 0x1 << 11; // Clear Interrupt Flag
+	return var;
+}
+
+void Timer0A_Handler(void)
 {
 	// Limpar o flag de interrupcao
 	TIMER0_ICR_R = 0x01;
@@ -292,7 +312,7 @@ void Timer0A_Handler()
 }
 
 
-void GPIOPortJ_Handler()
+void GPIOPortJ_Handler(void)
 {
 	//
 }
