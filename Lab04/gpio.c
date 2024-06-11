@@ -107,47 +107,6 @@ void GPIO_Init(void)
 	// 7. Habilitar resistor de pull-up interno, setar PUR para 1
 	GPIO_PORTJ_AHB_PUR_R = 0x03;   	//Bit0 e bit1
 	
-	// Uart run mode clock gating control
-	SYSCTL_RCGCUART_R = SYSCTL_RCGCUART_R0;			// ativa o bit 00000001
-	while (SYSCTL_PRUART_R != SYSCTL_PRUART_R0)
-		SysTick_Wait1ms(100);
-	
-	// Uart control
-	// RXE(habilita o receptor) = bit9 / TXE(habilita o transmissor) = bit8 / UARTEN(habilita a UART) = bit0
-	UART0_CTL_R = 0x00;												// desativando a UART
-	
-	// Uart Baud Rate
-	// Baud Rate 19200 bits/seg
-	// BRD = 80M / (16 * BaudRate) = 260,4167
-	UART0_IBRD_R = 260;											 	// 16 bits para parte inteira 
-	UART0_FBRD_R = 27;												// 6 bits para parte fracionada 0,4167 * 64 = 26,67 = 27
-	
-	// Num. bits, paridade, stop bits
-	/*
-	 * bit 6 e bit5 = WLEN: define o tamanho da palavra sendo 5 + bit6bit5(5 a 8 bits)
-	 * bit 4 = FEN: habilita a fila
-	 * bit 3 = bits de stop
-	 * 		0 => 1 bit de stop
-	 * 		1 => 2 bits de stop
-	 * bit 2
-	 *		0 => paridade ímpar
-	 *		1 => paridade par
-	 * bit 1 = PEN(Parity Enable) : habilita a paridade
-   *		0 => desabilita
-	 *		1 => habilita
-	 * bit 0 = BRK
-	 *		0 => normal uso
-	 *		1 => nao sei
-	 */
-	UART0_LCRH_R = 0x78;		// 0111 1000
-	// Start(1) + Word(8 bits) + Paridade(0) + Stop(2) = 11 bits
-	
-	// Select clock source
-	UART0_CC_R = 0x00;
-	
-	// Uart control
-	UART0_CTL_R = UART0_CTL_R | 0x301; // setando os bits 0011 0000 0001 habilitando TX, RX, UARTEN(uart enable)
-	
 	PortJ_interrupt_init();
 	
 	ADC0_init();
@@ -172,7 +131,7 @@ void Timer0A_init()
 	// Timer no modo 32 bits
 	TIMER0_CFG_R = 0x0;
 	
-	// Modo periódico
+	// Modo periodico
 	TIMER0_TAMR_R = 0x2;
 	
 	// Timeout de 7.999.999 clocks
@@ -181,16 +140,16 @@ void Timer0A_init()
 	// Usado apenas para o prescale
 	TIMER0_TAPR_R = 0x00;
 	
-	// Configuração da interrupção
+	// Configuracao da interrupcao
 	TIMER0_ICR_R = 0x1;
 	
-	// Interrupção no timeout
+	// Interrupcao no timeout
 	TIMER0_IMR_R = 0x00000001;
 	
-	// Prioridade da interrupção
+	// Prioridade da interrupcao
 	NVIC_PRI4_R = NVIC_PRI4_R | ((uint32_t)4 << (uint32_t)29);
 	
-	// Habilita a interrupção do timer
+	// Habilita a interrupcao do timer
 	NVIC_EN0_R = NVIC_EN0_R | ((uint32_t)1 << (uint32_t)19);
 
 	// Habilita o timer A
@@ -262,7 +221,7 @@ void ADC0_init()
 
 // -------------------------------------------------------------------------------
 // Funcao PortJ_Input
-// Lê os valores de entrada do port J
+// Le os valores de entrada do port J
 // Parametro de entrada: Nao tem
 // Parametro de saida: o valor da leitura do port
 uint32_t PortJ_Input(void)
@@ -271,7 +230,7 @@ uint32_t PortJ_Input(void)
 }
 
 // -------------------------------------------------------------------------------
-// Função PortA_Output
+// Funcao PortA_Output
 void PortA_Output(uint32_t valor)
 {
     uint32_t temp;

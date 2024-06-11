@@ -6,7 +6,6 @@
 
 //#include <stdint.h>
 #include "motor.h"
-#include "communication.h"
 #include <string.h>
 
 void PLL_Init(void);
@@ -20,9 +19,9 @@ void PortA_Output(uint32_t valor);
 void PortQ_Output(uint32_t valor);
 
 // ==========
-static uint8_t duty_cycle = 0;
-static uint8_t motor_state = OFF;
-static uint8_t motor_rot = CLOCKWISE;
+uint8_t duty_cycle = 0;
+uint8_t motor_state = OFF;
+uint8_t motor_rot = CLOCKWISE;
 // ==========
 
 int main(void)
@@ -31,7 +30,7 @@ int main(void)
 	PLL_Init();
 	SysTick_Init();
 	GPIO_Init();
-	Uart_init();
+	
 	// loop principal
 	while(1) {
 		//
