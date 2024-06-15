@@ -22,9 +22,9 @@
 #define ON																	1
 
 // ======================================
-static uint8_t duty_cycle = 0;
-static uint8_t motor_state = OFF;
-static uint8_t motor_rot = CLOCKWISE;
+extern volatile uint8_t duty_cycle;
+extern volatile uint8_t motor_state;
+extern volatile uint8_t motor_rot;
 // ======================================
 
 #endif // end of file MOTOR_H

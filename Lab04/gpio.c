@@ -3,37 +3,7 @@
 // Inicializa as portas J e N
 // Prof. Guilherme Peron
 
-
-#include <stdint.h>
-#include "tm4c1294ncpdt.h"
-#include "motor.h"
-
- // QPNMLKJHGFEDCBA
- // EDCBA9876543210
-#define GPIO_PORTA  (0x0001) //bit 0
-#define GPIO_PORTJ  (0x0100) //bit 8
-#define GPIO_PORTQ	(0x4000) //bit 14
-#define GPIO_PORTH	(0x0080) //bit 7 0000 0000 1000 0000
-#define GPIO_PORTN  (0x1000) //bit 12
-#define GPIO_PORTP	(0x2000) //bit 13
-#define GPIO_PORTF	(0x0020) //bit 5
-#define GPIO_PORTE	(0x0010) //bit 4
-
-void SysTick_Wait1ms(uint32_t delay);
-void GPIO_Init(void);
-void Timer0A_init(void);
-uint32_t PortJ_Input(void);
-void PortN_Output(uint32_t valor);
-void Timer0A_Handler(void);
-void GPIOPortJ_Handler(void);
-void PortJ_interrupt_init(void);
-void ADC0_init(void);
-void PortH_Output(uint8_t value);
-void PortA_Output(uint32_t valor);
-void PortQ_Output(uint32_t valor);
-void PortE_Output(uint8_t value);
-uint32_t PortE_Input(void);
-uint32_t adc_convertion(void);
+#include "gpio.h"
 
 /*
 extern uint8_t duty_cycle;
@@ -47,9 +17,7 @@ extern uint8_t motor_rot;
 // Parametro de entrada: Nao tem
 // Parametro de saida: Nao tem
 void GPIO_Init(void)
-{
-	Timer0A_init();
-	
+{	
 	//1a. Ativar o clock para a porta setando o bit correspondente no registrador RCGCGPIO
 	SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTQ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTH | GPIO_PORTP | GPIO_PORTF | GPIO_PORTE);
 	//1b.   apos isso verificar no PRGPIO se a porta esta pronta para uso.
@@ -63,7 +31,7 @@ void GPIO_Init(void)
 	GPIO_PORTQ_AMSEL_R = 0x00;
 	GPIO_PORTP_AMSEL_R = 0x00;
 	GPIO_PORTF_AHB_AMSEL_R = 0x00;
-	GPIO_PORTE_AHB_AMSEL_R = 0x18; // PE4 anlog; PE0, PE1 digital
+	GPIO_PORTE_AHB_AMSEL_R |= 0x10; // PE4 analog; PE0, PE1 digital
 		
 	// 3. Limpar PCTL para selecionar o GPIO
 	GPIO_PORTA_AHB_PCTL_R = 0x11;
@@ -73,7 +41,7 @@ void GPIO_Init(void)
 	GPIO_PORTQ_PCTL_R = 0x00;
 	GPIO_PORTP_PCTL_R = 0x00;
 	GPIO_PORTF_AHB_PCTL_R = 0x00;
-	GPIO_PORTE_AHB_PCTL_R = 0x00;
+	GPIO_PORTE_AHB_PCTL_R = 0x00000000;
 
 	// 4. DIR para 0 se for entrada, 1 se for saida
 	GPIO_PORTA_AHB_DIR_R = 0xF0;
@@ -83,7 +51,7 @@ void GPIO_Init(void)
 	GPIO_PORTQ_DIR_R = 0x0F;
 	GPIO_PORTP_DIR_R = 0x20; // PP5
 	GPIO_PORTF_AHB_DIR_R = 0x0C; // PF2, PF3
-	GPIO_PORTE_AHB_DIR_R = 0x0B; // PE4 input; PE0, PE1, PE3 output
+	GPIO_PORTE_AHB_DIR_R = 0x03; // PE4 input; PE0, PE1 output
 		
 	// 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem funcao alternativa	
 	GPIO_PORTA_AHB_AFSEL_R = 0x03;
@@ -93,7 +61,7 @@ void GPIO_Init(void)
 	GPIO_PORTQ_AFSEL_R = 0x00;
 	GPIO_PORTP_AFSEL_R = 0x00;
 	GPIO_PORTF_AHB_AFSEL_R = 0x00;
-	GPIO_PORTE_AHB_AFSEL_R = 0x18;
+	GPIO_PORTE_AHB_AFSEL_R = 0x10;
 		
 	// 6. Setar os bits de DEN para habilitar I/O digital	
 	GPIO_PORTA_AHB_DEN_R = 0xF3;   	//Bit0 = entrada e bit1 = saida
@@ -116,6 +84,8 @@ void GPIO_Init(void)
 	PortJ_interrupt_init();
 	
 	ADC0_init();
+	
+	Timer0A_init();
 }
 
 // -------------------------------------------------------------------------------
@@ -140,8 +110,8 @@ void Timer0A_init(void)
 	// Modo periodico
 	TIMER0_TAMR_R = 0x2;
 	
-	// Timeout de 7.999.999 clocks
-	TIMER0_TAILR_R = 0x7A11FF;
+	// Timeout de 79.999 clocks (period: 1ms)
+	TIMER0_TAILR_R = 0x1387F;
 	
 	// Usado apenas para o prescale
 	TIMER0_TAPR_R = 0x00;
@@ -198,31 +168,23 @@ void ADC0_init(void)
 	while ((SYSCTL_PRADC_R & 0x01) != 0x01){}
 	
 	// Full convertion rate
-	ADC0_PC_R = 0x7;
+	ADC0_PC_R = 0x5;
 	
-	// SS3 priority (highest)
-	ADC0_SSPRI_R = 0x0000;
-	
-	// SS2 priority
-	ADC0_SSPRI_R |= 0x1 << 8;
-	
-	// SS1 priority
-	ADC0_SSPRI_R |= 0x2 << 4;
-	
-	// SS0 priority (lowest)
-	ADC0_SSPRI_R |= 0x3;
+	// SS3 priority highest
+	ADC0_SSPRI_R = 0x0123;
 	
 	// ASEN2 = 0
-	ADC0_ACTSS_R &= 0xF07; // 1111 0000 0111
+	ADC0_ACTSS_R &= ~0x0008;
 	
-	ADC0_EMUX_R = 0x00;
+	ADC0_EMUX_R &= ~0xF000;
 	
-	ADC0_SSMUX3_R = 0x09;
+	ADC0_SSMUX3_R = 9;
 	
-	ADC0_SSCTL3_R = 0x6;
+	ADC0_SSCTL3_R = 0x0006;
+		
+	ADC0_IM_R &= ~0x0008;
 	
-	// ASEN2 = 1
-	ADC0_ACTSS_R |= 0x1 << 2;
+	ADC0_ACTSS_R |= 0x0008;
 }
 
 // -------------------------------------------------------------------------------
@@ -276,37 +238,34 @@ void PortE_Output(uint8_t value)
 
 uint32_t adc_convertion(void)
 {
+	uint32_t var;
 	ADC0_PSSI_R = ADC_PSSI_SS3;
-	while ((ADC0_RIS_R & (0x1 << 3)) != 0x1 << 3){}
-	uint32_t var = ADC0_SSFIFO3_R;
-	ADC0_ISC_R = 0x1 << 11; // Clear Interrupt Flag
+	while ((ADC0_RIS_R & 0x08) == 0){}
+	var = ADC0_SSFIFO3_R & 0xFFF;
+	ADC0_ISC_R = 0x0008; // Clear Interrupt Flag
 	return var;
 }
 
 void Timer0A_Handler(void)
 {
+		uint8_t rot_aux = motor_rot;
 	// Limpar o flag de interrupcao
 	TIMER0_ICR_R = 0x01;
-	
 	if (motor_state == OFF)
 	{
+		// Atualiza o timer da interrupcao
 		TIMER0_TAILR_R = 80000 * duty_cycle / 100;
 		motor_state = ON;
-		
 		if (motor_rot == CLOCKWISE)
-		{
 			PortE_Output(1);
-		}
 		else
-		{
 			PortE_Output(2);
-		}
 	}
 	else
 	{
+		// Atualiza o timer da interrupcao
 		TIMER0_TAILR_R = 80000 * (100 - duty_cycle) / 100;
 		motor_state = OFF;
-		
 		PortE_Output(0);
 	}
 }

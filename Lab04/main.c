@@ -6,6 +6,7 @@
 
 //#include <stdint.h>
 #include "motor.h"
+#include "gpio.h"
 #include <string.h>
 
 #define LCD		0
@@ -14,7 +15,6 @@
 void PLL_Init(void);
 void SysTick_Init(void);
 void SysTick_Wait1ms(uint32_t delay);
-void SysTick_Wait1us(uint32_t delay);
 void GPIO_Init(void);
 uint32_t PortJ_Input(void);
 void PortN_Output(uint32_t leds);
@@ -24,12 +24,13 @@ uint32_t adc_convertion(void);
 
 int main(void)
 {
-	uint8_t controle = 0;
+	uint8_t controle = 1;
 	//Funcoes de inicializacao 
 	PLL_Init();
 	SysTick_Init();
 	GPIO_Init();
 	
+	//*
 	// loop principal
 	while(1) {
 		uint32_t adc_result = adc_convertion();
@@ -37,15 +38,24 @@ int main(void)
 		if (controle == POT)
 		{
 			if (adc_result < 2047) //COUNTERCLOCKWISE
+			{
+				motor_rot = COUNTERCLOCKWISE;
+				adc_result = 2047 - adc_result;
 				duty_cycle = (uint8_t)(((adc_result * 100) / 4095) * 2);
+			}
 			else //CLOCKWISE
-				duty_cycle = (uint8_t)((((adc_result - 2048) * 100) / 4095) * 2);
+			{
+				motor_rot = CLOCKWISE;
+				adc_result -= 2048;
+				duty_cycle = (uint8_t)(((adc_result * 100) / 4095) * 2);
+			}
 		}
 		else
 		{
 			duty_cycle = (uint8_t)((adc_result * 100) / 4095);
 		}
 		
-		SysTick_Wait1ms(100);
+		SysTick_Wait1ms(10);
 	}
+	//*/
 }
