@@ -1,23 +1,24 @@
 Dependencies for Project 'lab04', Target 'Target 1': (DO NOT MODIFY !)
 CompilerVersion: 6160000::V6.16::ARMCLANG
-F (.\gpio.c)(0x666E2634)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-4 -O0 -ffunction-sections -Weverything -Wno-packed -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -IC:/Users/Eduardo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-D__UVISION_VERSION="536" -DTM4C1294NCPDT-o ./objects/gpio.o -MD)
-I (gpio.h)(0x666DE1CB)
+F (.\gpio.c)(0x666F77B7)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-4 -O0 -ffunction-sections -Weverything -Wno-packed -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -IC:/Users/Azelo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-D__UVISION_VERSION="536" -DTM4C1294NCPDT-o ./objects/gpio.o -MD)
+I (gpio.h)(0x666F500B)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x6035A280)
-I (tm4c1294ncpdt.h)(0x666D94C6)
-I (motor.h)(0x666E26FC)
-F (.\main.c)(0x666E29BF)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-4 -O0 -ffunction-sections -Weverything -Wno-packed -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -IC:/Users/Eduardo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-D__UVISION_VERSION="536" -DTM4C1294NCPDT-o ./objects/main.o -MD)
-I (motor.h)(0x666E26FC)
+I (tm4c1294ncpdt.h)(0x666F442E)
+I (motor.h)(0x666F7F34)
+F (.\main.c)(0x666F9B8E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-4 -O0 -ffunction-sections -Weverything -Wno-packed -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -IC:/Users/Azelo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-D__UVISION_VERSION="536" -DTM4C1294NCPDT-o ./objects/main.o -MD)
+I (motor.h)(0x666F7F34)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x6035A280)
-I (tm4c1294ncpdt.h)(0x666D94C6)
-I (gpio.h)(0x666DE1CB)
+I (tm4c1294ncpdt.h)(0x666F442E)
+I (gpio.h)(0x666F500B)
 I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x6035A280)
-F (.\motor.h)(0x666E26FC)()
-F (.\startup.s)(0x666D94C6)(--target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -masm=auto -c-gdwarf-4 -Wa,armasm,--pd,"__EVAL SETA 1"-IC:/Users/Eduardo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-Wa,armasm,--pd,"__UVISION_VERSION SETA 536" -Wa,armasm,--pd,"TM4C1294NCPDT SETA 1"-o ./objects/startup.o)
-F (.\tm4c1294ncpdt.h)(0x666D94C6)()
-F (.\utils.s)(0x666D94C6)(--target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -masm=auto -c-gdwarf-4 -Wa,armasm,--pd,"__EVAL SETA 1"-IC:/Users/Eduardo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-Wa,armasm,--pd,"__UVISION_VERSION SETA 536" -Wa,armasm,--pd,"TM4C1294NCPDT SETA 1"-o ./objects/utils.o)
-F (.\Decode.s)(0x666D94C6)(--target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -masm=auto -c-gdwarf-4 -Wa,armasm,--pd,"__EVAL SETA 1"-IC:/Users/Eduardo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-Wa,armasm,--pd,"__UVISION_VERSION SETA 536" -Wa,armasm,--pd,"TM4C1294NCPDT SETA 1"-o ./objects/decode.o)
-F (.\gpio.h)(0x666DE1CB)()
-F (.\motor.c)(0x666E26F5)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-4 -O0 -ffunction-sections -Weverything -Wno-packed -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -IC:/Users/Eduardo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-D__UVISION_VERSION="536" -DTM4C1294NCPDT-o ./objects/motor.o -MD)
-I (motor.h)(0x666E26FC)
+F (.\motor.h)(0x666F7F34)()
+F (.\startup.s)(0x666F442E)(--target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -masm=auto -c-gdwarf-4 -Wa,armasm,--pd,"__EVAL SETA 1"-IC:/Users/Azelo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-Wa,armasm,--pd,"__UVISION_VERSION SETA 536" -Wa,armasm,--pd,"TM4C1294NCPDT SETA 1"-o ./objects/startup.o)
+F (.\tm4c1294ncpdt.h)(0x666F442E)()
+F (.\utils.s)(0x666F4C8B)(--target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -masm=auto -c-gdwarf-4 -Wa,armasm,--pd,"__EVAL SETA 1"-IC:/Users/Azelo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-Wa,armasm,--pd,"__UVISION_VERSION SETA 536" -Wa,armasm,--pd,"TM4C1294NCPDT SETA 1"-o ./objects/utils.o)
+F (.\Decode.s)(0x666F8EC4)(--target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -masm=auto -c-gdwarf-4 -Wa,armasm,--pd,"__EVAL SETA 1"-IC:/Users/Azelo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-Wa,armasm,--pd,"__UVISION_VERSION SETA 536" -Wa,armasm,--pd,"TM4C1294NCPDT SETA 1"-o ./objects/decode.o)
+F (.\gpio.h)(0x666F500B)()
+F (.\motor.c)(0x666F78AF)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-4 -O0 -ffunction-sections -Weverything -Wno-packed -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -IC:/Users/Azelo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-D__UVISION_VERSION="536" -DTM4C1294NCPDT-o ./objects/motor.o -MD)
+I (motor.h)(0x666F7F34)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x6035A280)
-I (tm4c1294ncpdt.h)(0x666D94C6)
+I (tm4c1294ncpdt.h)(0x666F442E)
+F (.\lcd.s)(0x666F4A23)(--target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -masm=auto -c-gdwarf-4 -Wa,armasm,--pd,"__EVAL SETA 1"-IC:/Users/Azelo/AppData/Local/Arm/Packs/Keil/TM4C_DFP/1.1.0/Device/Include/TM4C129-Wa,armasm,--pd,"__UVISION_VERSION SETA 536" -Wa,armasm,--pd,"TM4C1294NCPDT SETA 1"-o ./objects/lcd.o)

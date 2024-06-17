@@ -15,6 +15,9 @@
 #define GPIO_PORTP	(0x2000) //bit 13
 #define GPIO_PORTF	(0x0020) //bit 5
 #define GPIO_PORTE	(0x0010) //bit 4
+#define GPIO_PORTK	(0x0200) //bit 9	0000 0010 0000 0000
+#define GPIO_PORTM	(0x0800) //bit 11 0000 1000 0000 0000 
+#define GPIO_PORTL	(0x0400) //bit 10 0000 0100 0000 0000
 
 void SysTick_Wait1ms(uint32_t delay);
 void SysTick_Wait1us(uint32_t delay);

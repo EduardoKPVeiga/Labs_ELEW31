@@ -53,6 +53,8 @@ SYSCTL_PLLSTAT_LOCK           EQU 0x00000001  ; PLL Lock
         AREA    |.text|, CODE, READONLY, ALIGN=2
         THUMB
         EXPORT  PLL_Init
+		EXPORT	SysTick_Wait1ms
+		EXPORT	SysTick_Wait1us
 
 ;------------PLL_Init------------
 ; Configura o sistema para utilizar o clock do PLL

@@ -9,7 +9,25 @@ GPIO_PORTL_DATA_R       EQU 0x400623FC
 			
 		EXPORT	Decode_Char
 		EXPORT	Read_Keyboard
+		EXPORT	Read_KeyboardC
 		IMPORT	SysTick_Wait1ms
+
+;---------------------------------------------------------------
+;------	Read_KeyboardC	----------------------------------------
+; Função para ler as teclas pressionadas
+; Entrada: Não tem
+; Saída: R2 -> coluna pressionada
+; Modifica: Nada
+Read_KeyboardC
+	PUSH	{LR}
+	BL 		Read_Keyboard
+	POP		{LR}
+	PUSH	{LR}
+	BL		Decode_Char
+	POP		{LR}
+	MOV		R0, R6
+	MOV		R6, #0						;habilitar outras leituras
+	BX		LR
 
 ;---------------------------------------------------------------
 ;------	Read_Keyboard	----------------------------------------
@@ -17,6 +35,8 @@ GPIO_PORTL_DATA_R       EQU 0x400623FC
 ; Entrada: Não tem
 ; Saída: R2 -> coluna pressionada
 ; Modifica: Nada
+
+
 Read_Keyboard
 	MOV		R1, #0x0000
 	MOVT	R1, #0x0000
